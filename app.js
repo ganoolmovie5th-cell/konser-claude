@@ -876,10 +876,437 @@ function updateStats() {
 }
 
 /* ============================================
+   FITUR 1 — COUNTDOWN TIMER
+   ============================================ */
+function getCountdown(rawDate) {
+  const now  = new Date();
+  const diff = rawDate - now;
+  if (diff <= 0) return null;
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000)  / 60000);
+  const s = Math.floor((diff % 60000)    / 1000);
+  return { d, h, m, s };
+}
+
+function renderCountdown(c) {
+  if (isPast(c) || isRumor(c)) return '';
+  const cd = getCountdown(c.rawDate);
+  if (!cd) return `<div class="countdown-past">Konser sedang berlangsung / sudah selesai</div>`;
+  return `
+    <div class="countdown-wrap" data-id="${c.id}">
+      <div class="cd-box"><span class="cd-num" data-field="d">${cd.d}</span><span class="cd-label">Hari</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-box"><span class="cd-num" data-field="h">${String(cd.h).padStart(2,'0')}</span><span class="cd-label">Jam</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-box"><span class="cd-num" data-field="m">${String(cd.m).padStart(2,'0')}</span><span class="cd-label">Menit</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-box"><span class="cd-num" data-field="s">${String(cd.s).padStart(2,'0')}</span><span class="cd-label">Detik</span></div>
+    </div>`;
+}
+
+// Tick semua countdown di halaman setiap detik
+setInterval(() => {
+  document.querySelectorAll('.countdown-wrap[data-id]').forEach(wrap => {
+    const c  = CONCERTS.find(x => x.id === wrap.dataset.id);
+    if (!c) return;
+    const cd = getCountdown(c.rawDate);
+    if (!cd) { wrap.outerHTML = `<div class="countdown-past">Segera dimulai!</div>`; return; }
+    wrap.querySelector('[data-field="d"]').textContent = cd.d;
+    wrap.querySelector('[data-field="h"]').textContent = String(cd.h).padStart(2,'0');
+    wrap.querySelector('[data-field="m"]').textContent = String(cd.m).padStart(2,'0');
+    wrap.querySelector('[data-field="s"]').textContent = String(cd.s).padStart(2,'0');
+  });
+}, 1000);
+
+/* ============================================
+   FITUR 2 — TOAST NOTIFICATION
+   ============================================ */
+function showToast(msg, type = 'info', duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 350);
+  }, duration);
+}
+
+/* ============================================
+   FITUR 3 — WISHLIST (localStorage)
+   ============================================ */
+function getWishlist() {
+  try { return JSON.parse(localStorage.getItem('concertid_wishlist') || '[]'); }
+  catch { return []; }
+}
+function saveWishlist(list) {
+  localStorage.setItem('concertid_wishlist', JSON.stringify(list));
+}
+function isWishlisted(id) { return getWishlist().includes(id); }
+
+function toggleWishlist(id) {
+  const list = getWishlist();
+  const idx  = list.indexOf(id);
+  if (idx === -1) {
+    list.push(id);
+    showToast('❤️ Ditambahkan ke Wishlist!', 'success');
+  } else {
+    list.splice(idx, 1);
+    showToast('💔 Dihapus dari Wishlist', 'info');
+  }
+  saveWishlist(list);
+  updateWishlistCount();
+  // Re-render kartu yang bersangkutan agar ikon berubah
+  applyFilters();
+}
+
+function updateWishlistCount() {
+  const count = getWishlist().length;
+  const badge = document.getElementById('wishlistCount');
+  if (!badge) return;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'inline-flex' : 'none';
+}
+
+/* ============================================
+   FITUR 4 — ADD TO CALENDAR (.ics)
+   ============================================ */
+function downloadICS(c) {
+  if (isRumor(c)) { showToast('⚠️ Tanggal belum pasti, tidak bisa dibuat kalender', 'error'); return; }
+  const dateStr  = c.rawDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  // End = start + 3 hours
+  const endDate  = new Date(c.rawDate.getTime() + 3 * 3600000);
+  const endStr   = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const loc      = `${c.venue}, ${c.city}`;
+  const desc     = `${c.tour}\\nHarga: ${c.priceRange}\\nTiket: ${c.ticketUrl}\\n\\nData dari ConcertID — www.list-concert-tour.web.id`;
+  const uid      = `${c.id}@list-concert-tour.web.id`;
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//ConcertID//list-concert-tour.web.id//ID',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTART:${dateStr}`,
+    `DTEND:${endStr}`,
+    `SUMMARY:🎵 ${c.artist} Live in Jakarta`,
+    `LOCATION:${loc}`,
+    `DESCRIPTION:${desc}`,
+    `URL:${window.location.origin}?concert=${c.id}`,
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href  = URL.createObjectURL(blob);
+  link.download = `${c.id}.ics`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+  showToast('📅 File kalender berhasil diunduh!', 'success');
+}
+
+/* ============================================
+   FITUR 5 — SHARE PANEL (WA / Twitter / Copy)
+   ============================================ */
+let _shareTarget = null;
+
+function openSharePanel(id) {
+  _shareTarget = CONCERTS.find(x => x.id === id);
+  if (!_shareTarget) return;
+  const c    = _shareTarget;
+  const url  = `${window.location.origin}${window.location.pathname}?concert=${c.id}`;
+  const text = `🎵 ${c.artist} — ${c.dates[0]} di ${c.venue.split('(')[0].trim()}, Jakarta!\nCek info lengkap & harga tiket di ConcertID 👇\n${url}`;
+
+  document.getElementById('sharePanelSubtitle').textContent = `${c.artist} · ${c.dates[0]}`;
+  document.getElementById('shareWa').href  = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  document.getElementById('shareTw').href  = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+
+  document.getElementById('shareCopy').onclick = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('🔗 Link berhasil disalin!', 'success');
+      closeSharePanel();
+    });
+  };
+
+  document.getElementById('sharePanel').classList.add('open');
+  document.getElementById('shareBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSharePanel() {
+  document.getElementById('sharePanel').classList.remove('open');
+  document.getElementById('shareBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('sharePanelClose').addEventListener('click', closeSharePanel);
+document.getElementById('shareBackdrop').addEventListener('click', closeSharePanel);
+
+/* ============================================
+   FITUR 6 — DEEP LINK (URL ?concert=id)
+   ============================================ */
+function handleDeepLink() {
+  const params = new URLSearchParams(window.location.search);
+  const cid    = params.get('concert');
+  if (cid && CONCERTS.find(x => x.id === cid)) {
+    setTimeout(() => openModal(cid), 400);
+  }
+}
+
+/* ============================================
+   FITUR 7 — HARGA VISUAL (progress bars)
+   ============================================ */
+function getPriceBadge(min) {
+  if (min === 0)          return { cls: '', label: 'TBA' };
+  if (min < 1000000)      return { cls: 'badge-affordable', label: '💚 Terjangkau' };
+  if (min < 2000000)      return { cls: 'badge-premium',    label: '💜 Premium' };
+  return                         { cls: 'badge-luxury',     label: '⭐ Luxury' };
+}
+
+function renderPriceVisual(c) {
+  if (!c.ticketCategories || c.ticketCategories.length === 0) return '';
+  // Only render if we have real prices
+  const hasPrices = c.ticketCategories.some(t => t.price.startsWith('Rp'));
+  if (!hasPrices) return '';
+
+  const badge    = getPriceBadge(c.priceMin);
+  const maxPrice = Math.max(...c.ticketCategories
+    .map(t => parseInt(t.price.replace(/\D/g, '')) || 0)
+    .filter(v => v > 0));
+  if (!maxPrice) return '';
+
+  const bars = c.ticketCategories
+    .filter(t => t.price.startsWith('Rp'))
+    .map(t => {
+      const val = parseInt(t.price.replace(/\D/g, '')) || 0;
+      const pct = Math.round((val / maxPrice) * 100);
+      const fmt = val >= 1000000
+        ? `${(val/1000000).toFixed(1).replace('.0','')}jt`
+        : `${(val/1000).toFixed(0)}rb`;
+      return `
+        <div class="price-bar-row">
+          <span class="price-bar-name" title="${t.name}">${t.name}</span>
+          <div class="price-bar-track"><div class="price-bar-fill" style="width:${pct}%"></div></div>
+          <span class="price-bar-val">${fmt}</span>
+        </div>`;
+    }).join('');
+
+  return `
+    <div class="price-visual">
+      <div class="price-visual-header">
+        <span class="price-visual-label">Harga Tiket</span>
+        ${badge.label !== 'TBA' ? `<span class="price-visual-badge ${badge.cls}">${badge.label}</span>` : ''}
+      </div>
+      <div class="price-bars">${bars}</div>
+    </div>`;
+}
+
+/* ============================================
+   FITUR 8 — VENUE MAPS (Google Maps embed)
+   ============================================ */
+const VENUE_MAPS = {
+  'Gelora Bung Karno':       'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.1!2d106.8027!3d-6.2183!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34b9d%3A0x5371bf0fdad786a2!2sGelora%20Bung%20Karno!5e0!3m2!1sid!2sid',
+  'Jakarta International':   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.9!2d106.8619!3d-6.1482!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e6a1d39c8b1b1e1%3A0x4e1b1a1a1a1a1a1a!2sJakarta%20International%20Stadium!5e0!3m2!1sid!2sid',
+  'NICE PIK':                'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.5!2d106.7305!3d-6.1023!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e6a0000000000001%3A0x1!2sNICE%20PIK2!5e0!3m2!1sid!2sid',
+  'ICE BSD':                 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.8!2d106.6637!3d-6.2991!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e9b7c55f5555%3A0x5!2sICE%20BSD%20City!5e0!3m2!1sid!2sid',
+  'Beach City':              'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.2!2d106.8403!3d-6.1258!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e6a1d5b5b5b5b5b%3A0x6!2sBeach%20City%20International%20Stadium!5e0!3m2!1sid!2sid',
+  'Ancol':                   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.1!2d106.8362!3d-6.1267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e6a1d4c4c4c4c4c%3A0x7!2sPantai%20Carnaval%20Ancol!5e0!3m2!1sid!2sid',
+  'Istora':                  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.1!2d106.8018!3d-6.2171!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3f0f0f0f0f0%3A0x8!2sIstora%20Senayan!5e0!3m2!1sid!2sid',
+  'JIEXPO':                  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.8!2d106.8558!3d-6.1656!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e6a1d8a8a8a8a8a%3A0x9!2sJIEXPO%20Kemayoran!5e0!3m2!1sid!2sid',
+  'Indonesia Arena':         'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.1!2d106.8027!3d-6.2183!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34b9d%3A0x5371bf0fdad786a2!2sIndonesia%20Arena!5e0!3m2!1sid!2sid',
+};
+
+function getVenueMapEmbed(venue) {
+  const key = Object.keys(VENUE_MAPS).find(k => venue.includes(k));
+  return key ? VENUE_MAPS[key] : null;
+}
+
+function getGoogleMapsUrl(venue, city) {
+  return `https://www.google.com/maps/search/${encodeURIComponent(venue + ', ' + city)}`;
+}
+
+/* ============================================
+   UPDATED renderCards — INCLUDE NEW FEATURES
+   ============================================ */
+// Patch renderCards to inject countdown + action buttons + price visual
+const _originalRenderCards = renderCards;
+renderCards = function(list) {
+  _originalRenderCards(list);
+  // Add countdown, action buttons, and price visual to each card after render
+  list.forEach(c => {
+    const card = document.querySelector(`.concert-card[onclick*="${c.id}"]`);
+    if (!card) return;
+    const body = card.querySelector('.card-body');
+    if (!body) return;
+
+    // Inject countdown before card-price (for upcoming confirmed only)
+    const cardPrice = body.querySelector('.card-price');
+    if (cardPrice && !isPast(c) && !isRumor(c)) {
+      const cdEl = document.createElement('div');
+      cdEl.innerHTML = renderCountdown(c);
+      body.insertBefore(cdEl.firstElementChild || cdEl, cardPrice);
+    }
+
+    // Inject price visual (replace card-price if we have detailed prices)
+    if (cardPrice && c.ticketCategories && c.ticketCategories.some(t => t.price.startsWith('Rp'))) {
+      const pvHtml = renderPriceVisual(c);
+      if (pvHtml) {
+        const pvEl = document.createElement('div');
+        pvEl.innerHTML = pvHtml;
+        cardPrice.replaceWith(pvEl.firstElementChild);
+      }
+    }
+
+    // Inject action buttons before card-footer
+    const cardFooter = body.querySelector('.card-footer');
+    if (cardFooter) {
+      const wishlisted = isWishlisted(c.id);
+      card.classList.toggle('in-wishlist', wishlisted);
+      const actionsEl = document.createElement('div');
+      actionsEl.className = 'card-actions';
+      actionsEl.innerHTML = `
+        <button class="btn-action${wishlisted ? ' wishlisted' : ''}"
+          onclick="event.stopPropagation();toggleWishlist('${c.id}')">
+          ${wishlisted ? '❤️' : '🤍'} ${wishlisted ? 'Wishlisted' : 'Wishlist'}
+        </button>
+        ${!isPast(c) && !isRumor(c) ? `
+        <button class="btn-action" onclick="event.stopPropagation();downloadICS(CONCERTS.find(x=>x.id==='${c.id}'))">
+          📅 Kalender
+        </button>` : ''}
+        <button class="btn-action" onclick="event.stopPropagation();openSharePanel('${c.id}')">
+          🔗 Share
+        </button>`;
+      body.insertBefore(actionsEl, cardFooter);
+    }
+  });
+};
+
+/* ============================================
+   UPDATED openModal — INCLUDE MAPS + SHARE + PRICE
+   ============================================ */
+const _originalOpenModal = openModal;
+openModal = function(id) {
+  _originalOpenModal(id);
+  const c = CONCERTS.find(x => x.id === id);
+  if (!c) return;
+
+  const mc = document.getElementById('modalContent');
+  if (!mc) return;
+
+  // 1. Inject maps after venue detail-box
+  const mapEmbed = getVenueMapEmbed(c.venue);
+  const mapsUrl  = getGoogleMapsUrl(c.venue, c.city);
+  const mapHtml  = `
+    <div class="venue-map-wrap">
+      ${mapEmbed
+        ? `<iframe src="${mapEmbed}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`
+        : `<a href="${mapsUrl}" target="_blank" rel="noopener" class="venue-map-link" style="padding:20px;display:flex;justify-content:center;background:rgba(255,255,255,0.03)">📍 Buka di Google Maps</a>`}
+    </div>
+    <a href="${mapsUrl}" target="_blank" rel="noopener" class="venue-map-link">
+      📍 Buka di Google Maps ↗
+    </a>`;
+
+  // Insert map after modal-details
+  const modalDetails = mc.querySelector('.modal-details');
+  if (modalDetails) {
+    const mapEl = document.createElement('div');
+    mapEl.innerHTML = mapHtml;
+    modalDetails.insertAdjacentElement('afterend', mapEl);
+  }
+
+  // 2. Inject share + calendar row before modal-actions
+  const modalActions = mc.querySelector('.modal-actions');
+  if (modalActions) {
+    const shareRow = document.createElement('div');
+    shareRow.className = 'modal-share-row';
+    shareRow.innerHTML = `
+      <button class="btn-action${isWishlisted(c.id) ? ' wishlisted' : ''}"
+        onclick="toggleWishlist('${c.id}');this.classList.toggle('wishlisted');this.innerHTML=isWishlisted('${c.id}')?'❤️ Wishlisted':'🤍 Wishlist'">
+        ${isWishlisted(c.id) ? '❤️ Wishlisted' : '🤍 Wishlist'}
+      </button>
+      ${!isPast(c) && !isRumor(c) ? `
+      <button class="btn-action" onclick="downloadICS(CONCERTS.find(x=>x.id==='${c.id}'))">
+        📅 Add to Calendar
+      </button>` : ''}
+      <button class="btn-action" onclick="openSharePanel('${c.id}')">
+        🔗 Share
+      </button>`;
+    modalActions.insertAdjacentElement('beforebegin', shareRow);
+  }
+
+  // 3. Update URL for deep link (without page reload)
+  const newUrl = `${window.location.pathname}?concert=${id}`;
+  history.replaceState(null, '', newUrl);
+};
+
+// Clean up URL when modal closes
+const _origCloseModal = closeModal;
+closeModal = function() {
+  _origCloseModal();
+  history.replaceState(null, '', window.location.pathname);
+};
+
+/* ============================================
+   AFFILIATE UTM — wrap all ticket URLs
+   ============================================ */
+function addUTM(url, source = 'concertid', medium = 'referral', campaign = 'konser-indo') {
+  if (!url || url === '#' || url.startsWith('https://instagram')) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set('utm_source',   source);
+    u.searchParams.set('utm_medium',   medium);
+    u.searchParams.set('utm_campaign', campaign);
+    return u.toString();
+  } catch { return url; }
+}
+
+// Patch: apply UTM to all ticket links after DOM renders
+function applyUTMToLinks() {
+  document.querySelectorAll('a.btn-primary[href], a[href*="loket.com"], a[href*="tiket.com"], a[href*="tix.id"]').forEach(a => {
+    if (a.dataset.utmApplied) return;
+    a.href = addUTM(a.href);
+    a.dataset.utmApplied = '1';
+  });
+}
+
+/* ============================================
+   UPDATED applyFilters — INCLUDE WISHLIST
+   ============================================ */
+const _origApplyFilters = applyFilters;
+applyFilters = function() {
+  if (activeFilter === 'wishlist') {
+    const wl = getWishlist();
+    let result = CONCERTS.filter(c => wl.includes(c.id));
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(c =>
+        c.artist.toLowerCase().includes(q) ||
+        c.venue.toLowerCase().includes(q) ||
+        c.city.toLowerCase().includes(q)
+      );
+    }
+    renderCards(result);
+    return;
+  }
+  _origApplyFilters();
+};
+
+/* ============================================
    INIT
    ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
   updateStats();
+  updateWishlistCount();
   renderCards(CONCERTS);
   renderHighlights();
+  handleDeepLink();
+  // Apply UTM after first render
+  setTimeout(applyUTMToLinks, 300);
 });

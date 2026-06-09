@@ -118,6 +118,7 @@
         <button class="filter-btn" data-filter="indie">Indie / Festival</button>
         <button class="filter-btn" data-filter="upcoming">Mendatang</button>
         <button class="filter-btn" data-filter="past">Sudah Lewat</button>
+        <button class="filter-btn filter-wishlist" data-filter="wishlist">❤️ Wishlist <span class="wishlist-count" id="wishlistCount" style="display:none">0</span></button>
       </div>
     </div>
   </section>
@@ -278,6 +279,32 @@
       <div class="modal-content" id="modalContent"></div>
     </div>
   </div>
+
+  <!-- SHARE PANEL (bottom sheet) -->
+  <div class="share-panel-backdrop" id="shareBackdrop"></div>
+  <div class="share-panel" id="sharePanel">
+    <div class="share-panel-handle"></div>
+    <div class="share-panel-title">Bagikan Konser 🎵</div>
+    <div class="share-panel-subtitle" id="sharePanelSubtitle"></div>
+    <div class="share-btns">
+      <a class="share-btn share-btn-wa" id="shareWa" href="#" target="_blank" rel="noopener">
+        <span class="share-btn-icon">💬</span>
+        <span class="share-btn-label">WhatsApp</span>
+      </a>
+      <a class="share-btn share-btn-tw" id="shareTw" href="#" target="_blank" rel="noopener">
+        <span class="share-btn-icon">🐦</span>
+        <span class="share-btn-label">Twitter / X</span>
+      </a>
+      <button class="share-btn share-btn-copy" id="shareCopy">
+        <span class="share-btn-icon">🔗</span>
+        <span class="share-btn-label">Copy Link</span>
+      </button>
+    </div>
+    <button class="share-panel-close" id="sharePanelClose">Tutup</button>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <script src="app.js"></script>
 </body>
