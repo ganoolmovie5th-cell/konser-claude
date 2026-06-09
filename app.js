@@ -1,0 +1,590 @@
+/* ============================================
+   KonserIndo — Concert Data & App Logic
+   Data: Tempo.co, Billboard, NME, Bandwagon Asia,
+   JamBase, tiket.com, loket.com, Weverse, Soompi
+   Last updated: June 9, 2026
+   ============================================ */
+
+const TODAY = new Date('2026-06-09');
+
+const CONCERTS = [
+
+  /* ════════ PAST CONCERTS ════════ */
+  {
+    id: 'blackpink-deadline-2025',
+    artist: 'BLACKPINK',
+    tour: 'WORLD TOUR <DEADLINE>',
+    genre: 'kpop', emoji: '🌸',
+    dates: ['1 November 2025', '2 November 2025'],
+    rawDate: new Date('2025-11-01'),
+    time: '18:00 WIB',
+    venue: 'Gelora Bung Karno (GBK) Utama',
+    city: 'Senayan, Jakarta Pusat',
+    promotor: 'Live Nation Asia',
+    ticketPlatform: 'tiket.com',
+    ticketUrl: 'https://tiket.com',
+    priceRange: 'Rp 1.000.000 – Rp 5.000.000',
+    priceMin: 1000000, priceMax: 5000000,
+    ticketCategories: [
+      { name: 'CAT 4', price: 'Rp 1.000.000' },
+      { name: 'CAT 3', price: 'Rp 1.800.000' },
+      { name: 'CAT 2', price: 'Rp 2.800.000' },
+      { name: 'CAT 1', price: 'Rp 3.800.000' },
+      { name: 'VIP', price: 'Rp 5.000.000' },
+    ],
+    confirmStatus: 'confirmed', hot: false,
+    description: 'BLACKPINK sukses menggelar konser "DEADLINE" di GBK selama 2 malam. Rosé, Jisoo, Jennie, dan Lisa tampil di hadapan lebih dari 100.000 penonton dan mengubah stadion menjadi "pink dome". Salah satu konser K-Pop terbaik dalam sejarah Indonesia.',
+    sources: ['weverse.io', 'tempo.co', 'thejakartapost.com'],
+  },
+  {
+    id: 'fforever-jakarta-2026',
+    artist: 'F✦FOREVER (F4 + Ashin)',
+    tour: 'F✦FOREVER 1st World Tour',
+    genre: 'pop', emoji: '⭐',
+    dates: ['29 Mei 2026', '30 Mei 2026'],
+    rawDate: new Date('2026-05-29'),
+    time: '19:30 WIB',
+    venue: 'Indonesia Arena, GBK',
+    city: 'Senayan, Jakarta Pusat',
+    promotor: 'Color Asia Live',
+    ticketPlatform: 'Loket.com',
+    ticketUrl: 'https://fforeverindonesia.com',
+    priceRange: 'Cek Loket.com',
+    priceMin: 0, priceMax: 0,
+    ticketCategories: [{ name: 'Various Categories', price: 'Cek loket.com' }],
+    confirmStatus: 'confirmed', hot: false,
+    description: 'F4 (Jerry Yan, Van Ness Wu, Vic Chou) bersama Ashin (vokalis Mayday) tampil 2 malam di Indonesia Arena dengan stage eksklusif "Four-Point Star". Nostalgia era Meteor Garden hadir kembali untuk jutaan fans Indonesia.',
+    sources: ['fforeverindonesia.com', 'cnbcindonesia.com'],
+  },
+  {
+    id: 'ateez-2026',
+    artist: 'ATEEZ',
+    tour: 'ATEEZ 2026 World Tour "In Your Fantasy"',
+    genre: 'kpop', emoji: '🌀',
+    dates: ['31 Januari 2026'],
+    rawDate: new Date('2026-01-31'),
+    time: '19:00 WIB',
+    venue: 'ICE BSD City Hall 5 & 6',
+    city: 'Tangerang Selatan, Banten',
+    promotor: 'AEG Presents Asia',
+    ticketPlatform: 'Loket.com',
+    ticketUrl: 'https://loket.com',
+    priceRange: 'Rp 750.000 – Rp 3.500.000',
+    priceMin: 750000, priceMax: 3500000,
+    ticketCategories: [
+      { name: 'Festival', price: 'Rp 750.000' },
+      { name: 'Standing', price: 'Rp 1.200.000' },
+      { name: 'CAT 3', price: 'Rp 1.800.000' },
+      { name: 'CAT 2', price: 'Rp 2.500.000' },
+      { name: 'VIP', price: 'Rp 3.500.000' },
+    ],
+    confirmStatus: 'confirmed', hot: false,
+    description: 'ATEEZ menggebrak ICE BSD dalam tur dunia "In Your Fantasy". Penampilan perdana mereka di Jakarta disambut antusias oleh ribuan ATINY Indonesia.',
+    sources: ['bandwagon.asia', 'chosun.com'],
+  },
+  {
+    id: 'dream-theater-2026',
+    artist: 'Dream Theater',
+    tour: '40th Anniversary World Tour',
+    genre: 'rock', emoji: '🎸',
+    dates: ['7 Februari 2026'],
+    rawDate: new Date('2026-02-07'),
+    time: '20:00 WIB',
+    venue: 'Beach City International Stadium',
+    city: 'Ancol, Jakarta Utara',
+    promotor: 'Mainstager Indonesia',
+    ticketPlatform: 'Loket.com',
+    ticketUrl: 'https://dreamtheaterjakarta2026.com',
+    priceRange: 'Rp 900.000 – Rp 4.500.000',
+    priceMin: 900000, priceMax: 4500000,
+    ticketCategories: [
+      { name: 'Festival B', price: 'Rp 900.000' },
+      { name: 'Festival A', price: 'Rp 1.500.000' },
+      { name: 'Tribun C', price: 'Rp 2.000.000' },
+      { name: 'Tribun B', price: 'Rp 3.000.000' },
+      { name: 'VIP', price: 'Rp 4.500.000' },
+    ],
+    confirmStatus: 'confirmed', hot: false,
+    description: 'Dream Theater merayakan 40 tahun berkarya bersama formasi lengkap termasuk Mike Portnoy yang comeback setelah 14 tahun absen.',
+    sources: ['dreamtheaterjakarta2026.com', 'metaltalk.net'],
+  },
+  {
+    id: 'mcr-hammersonic-2026',
+    artist: 'My Chemical Romance',
+    tour: 'Hammersonic Festival 2026',
+    genre: 'rock', emoji: '🖤',
+    dates: ['3 Mei 2026'],
+    rawDate: new Date('2026-05-03'),
+    time: '20:30 WIB',
+    venue: 'Pantai Carnaval Ancol',
+    city: 'Jakarta Utara',
+    promotor: 'Hammersonic',
+    ticketPlatform: 'Loket.com',
+    ticketUrl: 'https://loket.com',
+    priceRange: 'Rp 950.000 – Rp 2.800.000',
+    priceMin: 950000, priceMax: 2800000,
+    ticketCategories: [
+      { name: '1-Day Pass', price: 'Rp 950.000' },
+      { name: '2-Day Pass', price: 'Rp 1.700.000' },
+      { name: 'VIP 1-Day', price: 'Rp 1.800.000' },
+      { name: 'VIP 2-Day', price: 'Rp 2.800.000' },
+    ],
+    confirmStatus: 'confirmed', hot: false,
+    description: 'MCR headliner Hammersonic 2026 di Pantai Carnaval Ancol. Membawakan hits legendaris termasuk "Welcome to the Black Parade" dan "Helena".',
+    sources: ['tempo.co', 'nme.com', 'kerrang.com'],
+  },
+  {
+    id: 'laufey-jakarta-2026',
+    artist: 'Laufey',
+    tour: '"A Matter of Time" Tour',
+    genre: 'jazz', emoji: '🌸',
+    dates: ['23 Mei 2026'],
+    rawDate: new Date('2026-05-23'),
+    time: '20:00 WIB',
+    venue: 'NICE PIK2',
+    city: 'Pantai Indah Kapuk 2, Tangerang',
+    promotor: 'Ismaya Live',
+    ticketPlatform: 'Loket.com',
+    ticketUrl: 'https://laufeyjakarta.com',
+    priceRange: 'Rp 850.000 – Rp 3.200.000',
+    priceMin: 850000, priceMax: 3200000,
+    ticketCategories: [
+      { name: 'GA', price: 'Rp 850.000' },
+      { name: 'Tribune', price: 'Rp 1.400.000' },
+      { name: 'CAT 2', price: 'Rp 2.000.000' },
+      { name: 'CAT 1', price: 'Rp 2.600.000' },
+      { name: 'VIP', price: 'Rp 3.200.000' },
+    ],
+    confirmStatus: 'confirmed', hot: false,
+    description: 'Grammy Award-winning Laufey membawa "A Matter of Time" Tour ke Jakarta setelah sold out di Singapore. Memukau fans dengan nuansa jazz dan orkestra live.',
+    sources: ['tempo.co', 'laufeyjakarta.com'],
+  },
+  {
+    id: 'java-jazz-2026',
+    artist: 'Java Jazz Festival 2026',
+    tour: 'myBCA International Java Jazz Festival',
+    genre: 'jazz', emoji: '🎷',
+    dates: ['29 Mei 2026', '30 Mei 2026', '31 Mei 2026'],
+    rawDate: new Date('2026-05-29'),
+    time: '15:00 – 01:00 WIB',
+    venue: 'NICE PIK2',
+    city: 'Pantai Indah Kapuk 2, Tangerang',
+    promotor: 'Java Festival Production',
+    ticketPlatform: 'jfp.events',
+    ticketUrl: 'https://jfp.events',
+    priceRange: 'Cek jfp.events',
+    priceMin: 0, priceMax: 0,
+    ticketCategories: [
+      { name: 'Daily Pass', price: 'Cek jfp.events' },
+      { name: '3 Days Pass', price: 'Cek jfp.events' },
+      { name: 'VIP Package', price: 'Cek jfp.events' },
+    ],
+    confirmStatus: 'confirmed', hot: false,
+    description: 'Festival jazz terbesar Asia. Lineup 2026: Jon Batiste (Grammy ×8), Wave to Earth, Ella Mai, Daniel Caesar, Dave Koz & Summer Horns, Lisa Simone, Earth Wind & Fire by Al McKay.',
+    lineup: ['Jon Batiste', 'Wave to Earth', 'Ella Mai', 'Daniel Caesar', 'Dave Koz & Summer Horns', 'Lisa Simone', 'Thee Sacred Souls', 'Earth Wind & Fire by Al McKay'],
+    sources: ['thejakartapost.com', 'indiplomacy.com', 'javajazzfestival.com'],
+  },
+
+  /* ════════ UPCOMING CONFIRMED ════════ */
+  {
+    id: 'the-weeknd-jakarta-2026',
+    artist: 'The Weeknd',
+    tour: '"After Hours Til Dawn" Stadium Tour Asia',
+    genre: 'pop', emoji: '🌙',
+    dates: ['26 September 2026', '27 September 2026'],
+    rawDate: new Date('2026-09-26'),
+    time: '19:00 WIB',
+    venue: 'Jakarta International Stadium (JIS)',
+    city: 'Tanjung Priok, Jakarta Utara',
+    promotor: 'Live Nation Asia',
+    ticketPlatform: 'Live Nation',
+    ticketUrl: 'https://www.livenation.com',
+    priceRange: 'Rp 1.000.000 – Rp 5.500.000',
+    priceMin: 1000000, priceMax: 5500000,
+    ticketCategories: [
+      { name: 'Tribune D', price: 'Rp 1.000.000' },
+      { name: 'Tribune C', price: 'Rp 1.600.000' },
+      { name: 'Tribune B', price: 'Rp 2.200.000' },
+      { name: 'Tribune A', price: 'Rp 3.000.000' },
+      { name: 'Pit Standing', price: 'Rp 3.800.000' },
+      { name: 'VIP Package', price: 'Rp 5.500.000' },
+    ],
+    confirmStatus: 'confirmed', hot: true,
+    description: 'The Weeknd membawa tur stadion "After Hours Til Dawn" ke Jakarta 2 malam berturut-turut di JIS. Ini adalah leg final dari salah satu tur paling sukses dalam sejarah musik dunia, dengan produksi panggung yang spektakuler.',
+    sources: ['karlobag.eu', 'billboard.com', 'afterhourstildawntour2026.com'],
+  },
+  {
+    id: 'mcr-jis-2026',
+    artist: 'My Chemical Romance',
+    tour: '"Long Live the Black Parade" Asia Tour',
+    genre: 'rock', emoji: '🖤',
+    dates: ['22 November 2026'],
+    rawDate: new Date('2026-11-22'),
+    time: '19:00 WIB',
+    venue: 'Jakarta International Stadium (JIS)',
+    city: 'Tanjung Priok, Jakarta Utara',
+    promotor: 'iMe Indonesia',
+    ticketPlatform: 'tiket.com',
+    ticketUrl: 'https://www.tiket.com/en-us/to-do/my-chemical-romance-live-in-jakarta-2026',
+    priceRange: 'Rp 850.000 – Rp 4.000.000',
+    priceMin: 850000, priceMax: 4000000,
+    ticketCategories: [
+      { name: 'Tribune D', price: 'Rp 850.000' },
+      { name: 'Tribune C', price: 'Rp 1.200.000' },
+      { name: 'Tribune B', price: 'Rp 1.800.000' },
+      { name: 'Tribune A', price: 'Rp 2.500.000' },
+      { name: 'Pit Standing', price: 'Rp 3.000.000' },
+      { name: 'VIP', price: 'Rp 4.000.000' },
+    ],
+    confirmStatus: 'confirmed', hot: true,
+    description: 'MCR kembali ke Jakarta untuk konser standalone penuh di JIS! Bagian dari tur "Long Live the Black Parade" — lebih megah dari penampilan Hammersonic. Konser penuh 2+ jam dengan seluruh katalog hits.',
+    sources: ['tiket.com', 'mcrjakarta.com', 'thebeat.asia'],
+  },
+  {
+    id: 'bts-jakarta-2026',
+    artist: 'BTS',
+    tour: 'BTS World Tour "ARIRANG"',
+    genre: 'kpop', emoji: '💜',
+    dates: ['26 Desember 2026', '27 Desember 2026'],
+    rawDate: new Date('2026-12-26'),
+    time: '18:00 WIB',
+    venue: 'Gelora Bung Karno (GBK) Utama',
+    city: 'Senayan, Jakarta Pusat',
+    promotor: 'iMe Indonesia',
+    ticketPlatform: 'btsworldtourofficial.com',
+    ticketUrl: 'https://btsworldtourofficial.com',
+    priceRange: 'Rp 1.800.000 – Rp 4.500.000',
+    priceMin: 1800000, priceMax: 4500000,
+    ticketCategories: [
+      { name: 'CAT 4 (Tribune)', price: 'Rp 1.800.000' },
+      { name: 'CAT 3 (Tribune)', price: 'Rp 2.500.000' },
+      { name: 'CAT 2 (Pit)', price: 'Rp 3.200.000' },
+      { name: 'CAT 1 (Floor)', price: 'Rp 3.800.000' },
+      { name: 'Soundcheck VIP', price: 'Rp 4.500.000' },
+    ],
+    confirmStatus: 'confirmed', hot: true,
+    description: 'BTS kembali ke Jakarta setelah 4 tahun! Tur "ARIRANG" hadir dengan stage 360° revolusioner di GBK Utama selama 2 malam. General on-sale via btsworldtourofficial.com. Presale ARMY dimulai 2 Juni 2026.',
+    sources: ['tempo.co', 'billboard.com', 'ndtvprofit.com'],
+  },
+
+  /* ════════ RUMOR / BELUM OFFICIAL ════════ */
+  {
+    id: 'aespa-jakarta-rumor',
+    artist: 'aespa',
+    tour: 'SYNK : COMPLæXITY World Tour',
+    genre: 'kpop', emoji: '🤖',
+    dates: ['TBA – Late 2026 / Early 2027'],
+    rawDate: new Date('2026-12-01'),
+    time: 'TBA',
+    venue: 'TBA (kemungkinan ICE BSD atau NICE PIK2)',
+    city: 'Jakarta / Tangerang',
+    promotor: 'Belum diumumkan',
+    ticketPlatform: 'TBA',
+    ticketUrl: 'https://aespaworldtour.com',
+    priceRange: 'Belum diumumkan',
+    priceMin: 0, priceMax: 0,
+    ticketCategories: [{ name: 'Semua kategori', price: 'Belum diumumkan' }],
+    confirmStatus: 'rumor', hot: true,
+    rumorDetail: 'Tour "SYNK : COMPLæXITY" resmi diumumkan Live Nation (Apr 2026) dengan stop Asia, namun tanggal & venue Indonesia BELUM dikonfirmasi. Ticketing Asia diumumkan "at a later date". Fans Indo sangat berharap dapat giliran.',
+    description: 'aespa mengumumkan tur dunia "SYNK : COMPLæXITY" (Agu 2026 – Feb 2027) via Live Nation. Negara Asia yang dikunjungi belum dirinci secara lengkap. Indonesia adalah target kuat mengingat basis fan besar.',
+    sources: ['livenation.com', 'justjared.com', 'aespaworldtour.com'],
+  },
+  {
+    id: 'ed-sheeran-jakarta-rumor',
+    artist: 'Ed Sheeran',
+    tour: 'LOOP Tour',
+    genre: 'pop', emoji: '🎶',
+    dates: ['TBA – 2026 (pernah dibatalkan, janji kembali)'],
+    rawDate: new Date('2026-10-01'),
+    time: 'TBA',
+    venue: 'TBA',
+    city: 'Jakarta',
+    promotor: 'TBA',
+    ticketPlatform: 'TBA',
+    ticketUrl: 'https://edsheeran.com',
+    priceRange: 'Belum diumumkan',
+    priceMin: 0, priceMax: 0,
+    ticketCategories: [{ name: 'Semua kategori', price: 'TBA' }],
+    confirmStatus: 'rumor', hot: false,
+    rumorDetail: 'Ed Sheeran pernah cancel konser Jakarta dan berjanji kembali (laporan Coconuts.co). LOOP Tour 2026 saat ini fokus ke Australia, NZ, dan Amerika. Indonesia belum masuk jadwal resmi.',
+    description: 'Ed Sheeran sedang dalam LOOP Tour 2026. Meski belum ada tanggal resmi untuk Indonesia, riwayat konsernya di Jakarta dan janjinya untuk kembali membuat rumor ini terus bergulir kencang.',
+    sources: ['coconuts.co', 'wikipedia.org (Loop Tour)'],
+  },
+  {
+    id: 'coldplay-jakarta-rumor',
+    artist: 'Coldplay',
+    tour: 'Music of the Spheres World Tour (Potential Return)',
+    genre: 'pop', emoji: '🪐',
+    dates: ['TBA – 2027 (kemungkinan)'],
+    rawDate: new Date('2027-01-01'),
+    time: 'TBA',
+    venue: 'TBA (kemungkinan GBK)',
+    city: 'Jakarta',
+    promotor: 'TBA',
+    ticketPlatform: 'TBA',
+    ticketUrl: 'https://coldplay.com',
+    priceRange: 'Belum diumumkan',
+    priceMin: 0, priceMax: 0,
+    ticketCategories: [{ name: 'Semua kategori', price: 'TBA' }],
+    confirmStatus: 'rumor', hot: true,
+    rumorDetail: 'Coldplay pause tur setelah Wembley Sep 2025 dan akan restart 2027. Konser Jakarta 2023 sangat sukses. Spekulasi return 2027 sangat kuat di komunitas fans. BELUM ada konfirmasi resmi dari band maupun promotor.',
+    description: 'Setelah konser fenomenal di GBK (2023), Coldplay dirumorkan kembali untuk leg 2027 dari Music of the Spheres World Tour. Tur mereka restart 2027 setelah jeda panjang — Indonesia jadi salah satu kandidat terkuat.',
+    sources: ['wikipedia.org (MOTSWT)', 'coldplaytour.org'],
+  },
+  {
+    id: 'taylor-swift-jakarta-rumor',
+    artist: 'Taylor Swift',
+    tour: 'New Tour (TBA)',
+    genre: 'pop', emoji: '✨',
+    dates: ['TBA – Belum ada indikasi jelas'],
+    rawDate: new Date('2027-06-01'),
+    time: 'TBA',
+    venue: 'TBA',
+    city: 'Jakarta',
+    promotor: 'TBA',
+    ticketPlatform: 'TBA',
+    ticketUrl: 'https://taylorswift.com',
+    priceRange: 'Belum diumumkan',
+    priceMin: 0, priceMax: 0,
+    ticketCategories: [{ name: 'Semua kategori', price: 'TBA' }],
+    confirmStatus: 'rumor', hot: true,
+    rumorDetail: 'Eras Tour tidak mampir ke Indonesia — kekecewaan terbesar jutaan Swifties. Taylor Swift belum mengumumkan tur baru untuk 2026/2027. Rumor ini murni harapan fans dan belum ada konfirmasi apapun dari pihak resmi.',
+    description: 'Rumor Taylor Swift ke Jakarta selalu muncul setiap tahun. Pemerintah Indonesia bahkan pernah aktif mengupayakan konser Taylor Swift. Sampai saat ini tidak ada konfirmasi resmi dari manajemen maupun promotor manapun.',
+    sources: ['stylecaster.com', 'jakartaglobe.id'],
+  },
+];
+
+/* ============================================
+   UTILITY
+   ============================================ */
+const isPast   = c => c.rawDate < TODAY;
+const isRumor  = c => c.confirmStatus === 'rumor';
+const genreLabel = g => ({ kpop:'K-Pop', pop:'Pop / R&B', rock:'Rock', jazz:'Jazz' }[g] || g);
+
+/* ============================================
+   RENDER CARDS
+   ============================================ */
+function renderCards(list) {
+  const grid     = document.getElementById('concertsGrid');
+  const noResult = document.getElementById('noResult');
+
+  if (!list.length) {
+    grid.innerHTML = '';
+    noResult.classList.remove('hidden');
+    return;
+  }
+  noResult.classList.add('hidden');
+
+  grid.innerHTML = list.map(c => {
+    const past  = isPast(c);
+    const rumor = isRumor(c);
+    const statusLabel = past ? 'Sudah Lewat' : rumor ? 'Rumor' : 'Confirmed';
+    const statusClass = past ? 'badge-status-past' : rumor ? 'badge-status-rumor' : 'badge-status-upcoming';
+    const priceDisplay = c.priceMin > 0
+      ? `Rp ${(c.priceMin/1e6).toFixed(1).replace('.0','')}jt – Rp ${(c.priceMax/1e6).toFixed(1).replace('.0','')}jt`
+      : rumor ? '⚠️ Belum diumumkan' : c.priceRange;
+
+    return `
+      <div class="concert-card${past?' past':''}${rumor?' rumor-card':''}" onclick="openModal('${c.id}')">
+        <div class="card-header">
+          <div class="card-bg">${c.emoji}</div>
+          <div class="card-overlay"></div>
+          <div class="card-badges">
+            <span class="badge badge-genre-${c.genre}">${genreLabel(c.genre)}</span>
+            <span class="badge ${statusClass}">${past?'':'rumor'===c.confirmStatus?'🔮 ':'✅ '}${statusLabel}</span>
+            ${c.hot ? '<span class="badge badge-hot">🔥 Hot</span>' : ''}
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-artist">${c.artist}</div>
+          <div class="card-tour">${c.tour}</div>
+          ${rumor ? '<div class="rumor-banner">⚠️ Belum ada pengumuman resmi</div>' : ''}
+          <div class="card-meta">
+            <div class="meta-row"><span class="meta-icon">📅</span><span class="meta-text"><strong>${c.dates.join(' &amp; ')}</strong></span></div>
+            <div class="meta-row"><span class="meta-icon">🕐</span><span class="meta-text">${c.time}</span></div>
+            <div class="meta-row"><span class="meta-icon">📍</span><span class="meta-text"><strong>${c.venue}</strong><br>${c.city}</span></div>
+            <div class="meta-row"><span class="meta-icon">🎟️</span><span class="meta-text">${c.promotor}</span></div>
+          </div>
+          <div class="card-price${rumor?' card-price-rumor':''}">
+            <div>
+              <div class="price-label">${rumor ? '⚠️ Status Harga' : 'Harga Tiket'}</div>
+              <div class="price-range">${priceDisplay}</div>
+            </div>
+            <span style="font-size:1.4rem">${rumor ? '❓' : '💳'}</span>
+          </div>
+          <div class="card-footer">
+            ${!past && !rumor
+              ? `<a class="btn btn-primary" href="${c.ticketUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🎫 Beli Tiket</a>`
+              : rumor
+                ? `<button class="btn btn-rumor" onclick="openModal('${c.id}');event.stopPropagation()">🔮 Lihat Detail</button>`
+                : `<button class="btn btn-disabled" disabled>Konser Selesai</button>`
+            }
+            <button class="btn btn-secondary" onclick="openModal('${c.id}');event.stopPropagation()">Detail ›</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ============================================
+   RENDER HIGHLIGHTS
+   ============================================ */
+function renderHighlights() {
+  const row   = document.getElementById('highlightsRow');
+  const picks = CONCERTS.filter(c => !isPast(c)).slice(0, 5);
+
+  row.innerHTML = picks.map(c => `
+    <div class="highlight-card${isRumor(c)?' highlight-rumor':''}" onclick="openModal('${c.id}')">
+      <span class="hl-emoji">${c.emoji}</span>
+      <div class="hl-artist">${c.artist}</div>
+      ${isRumor(c) ? '<div class="hl-rumor-badge">🔮 Rumor</div>' : ''}
+      <div class="hl-date">📅 ${c.dates[0]}</div>
+      <div class="hl-desc">${c.venue} · ${c.city.split(',')[0]}</div>
+    </div>`).join('');
+}
+
+/* ============================================
+   MODAL
+   ============================================ */
+function openModal(id) {
+  const c = CONCERTS.find(x => x.id === id);
+  if (!c) return;
+  const past  = isPast(c);
+  const rumor = isRumor(c);
+
+  const ticketHtml = c.ticketCategories.map(t =>
+    `<div class="ticket-cat"><span class="ticket-cat-name">${t.name}</span><span class="ticket-cat-price">${t.price}</span></div>`
+  ).join('');
+
+  const lineupHtml = c.lineup
+    ? `<div class="lineup-tags">${c.lineup.map(a=>`<span class="lineup-tag">${a}</span>`).join('')}</div>`
+    : '';
+
+  const rumorBoxHtml = rumor && c.rumorDetail
+    ? `<div class="rumor-detail-box"><div class="rumor-detail-title">🔮 Kenapa ini masih Rumor?</div><p>${c.rumorDetail}</p></div>`
+    : '';
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-hero">
+      <span class="modal-emoji">${c.emoji}</span>
+      <div class="modal-artist">${c.artist}</div>
+      <div class="modal-tour">${c.tour}</div>
+      <div class="modal-badges">
+        <span class="badge badge-genre-${c.genre}">${genreLabel(c.genre)}</span>
+        <span class="badge badge-status-${past?'past':rumor?'rumor':'upcoming'}">${past?'Sudah Lewat':rumor?'🔮 Rumor':'✅ Confirmed'}</span>
+        ${c.hot ? '<span class="badge badge-hot">🔥 Hot</span>' : ''}
+      </div>
+    </div>
+    ${rumorBoxHtml}
+    <div class="modal-details">
+      <div class="detail-box"><div class="detail-label">📅 Tanggal</div><div class="detail-value">${c.dates.join('<br>')}</div></div>
+      <div class="detail-box"><div class="detail-label">🕐 Jam Mulai</div><div class="detail-value">${c.time}</div></div>
+      <div class="detail-box" style="grid-column:1/-1"><div class="detail-label">📍 Venue</div><div class="detail-value">${c.venue}<br><span style="font-weight:400;color:var(--text-sub);font-size:0.85rem">${c.city}</span></div></div>
+      <div class="detail-box"><div class="detail-label">🎟️ Promotor</div><div class="detail-value">${c.promotor}</div></div>
+      <div class="detail-box"><div class="detail-label">💳 Platform Tiket</div><div class="detail-value">${c.ticketPlatform}</div></div>
+      <div class="detail-box" style="grid-column:1/-1"><div class="detail-label">💰 Range Harga</div><div class="detail-value price-color">${c.priceRange}</div></div>
+    </div>
+    <div class="modal-desc">${c.description}</div>
+    ${lineupHtml ? `<div class="modal-ticket-area"><h4>🎤 Lineup</h4>${lineupHtml}</div>` : ''}
+    <div class="modal-ticket-area"><h4>🎫 Kategori Tiket</h4><div class="ticket-categories">${ticketHtml}</div></div>
+    <div class="modal-actions">
+      ${!past && !rumor
+        ? `<a class="btn btn-primary" href="${c.ticketUrl}" target="_blank" rel="noopener">🎫 Beli Tiket Sekarang</a>`
+        : rumor
+          ? `<a class="btn btn-rumor-outline" href="${c.ticketUrl}" target="_blank" rel="noopener">🔔 Pantau Info Resmi</a>`
+          : `<button class="btn btn-disabled" disabled>Konser Telah Selesai</button>`
+      }
+    </div>
+    <div class="modal-disclaimer">
+      ${rumor
+        ? '⚠️ <b>DISCLAIMER:</b> Konser ini BELUM dikonfirmasi secara resmi. Jangan beli tiket dari pihak tidak resmi!'
+        : '⚠️ <b>Disclaimer:</b> Harga tiket dapat berubah. Selalu cek platform resmi sebelum membeli.'
+      }
+    </div>
+    ${c.sources ? `<div class="modal-sources">Sumber: ${c.sources.join(' · ')}</div>` : ''}
+  `;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ============================================
+   FILTER & SEARCH
+   ============================================ */
+let activeFilter = 'all';
+let searchQuery  = '';
+
+function applyFilters() {
+  let result = [...CONCERTS];
+
+  if      (activeFilter === 'kpop')      result = result.filter(c => c.genre === 'kpop');
+  else if (activeFilter === 'pop')       result = result.filter(c => c.genre === 'pop');
+  else if (activeFilter === 'rock')      result = result.filter(c => c.genre === 'rock');
+  else if (activeFilter === 'jazz')      result = result.filter(c => c.genre === 'jazz');
+  else if (activeFilter === 'confirmed') result = result.filter(c => c.confirmStatus === 'confirmed' && !isPast(c));
+  else if (activeFilter === 'rumor')     result = result.filter(c => isRumor(c));
+  else if (activeFilter === 'upcoming')  result = result.filter(c => !isPast(c));
+  else if (activeFilter === 'past')      result = result.filter(c => isPast(c));
+
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase();
+    result = result.filter(c =>
+      c.artist.toLowerCase().includes(q) ||
+      c.tour.toLowerCase().includes(q) ||
+      c.venue.toLowerCase().includes(q) ||
+      c.city.toLowerCase().includes(q) ||
+      (c.lineup && c.lineup.some(a => a.toLowerCase().includes(q)))
+    );
+  }
+
+  renderCards(result);
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    activeFilter = this.dataset.filter;
+    applyFilters();
+    document.getElementById('concertsGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', function () {
+  searchQuery = this.value;
+  applyFilters();
+});
+
+/* ============================================
+   NAVBAR SCROLL
+   ============================================ */
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+/* ============================================
+   STATS
+   ============================================ */
+function updateStats() {
+  document.getElementById('totalConcerts').textContent  = CONCERTS.length;
+  document.getElementById('confirmedCount').textContent = CONCERTS.filter(c => c.confirmStatus === 'confirmed' && !isPast(c)).length;
+  document.getElementById('rumorCount').textContent     = CONCERTS.filter(c => isRumor(c)).length;
+}
+
+/* ============================================
+   INIT
+   ============================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  updateStats();
+  renderCards(CONCERTS);
+  renderHighlights();
+});

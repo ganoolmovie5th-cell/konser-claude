@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KonserIndo — Jadwal Konser Internasional di Indonesia 2026</title>
+  <meta name="description" content="Temukan jadwal lengkap konser musisi internasional di Indonesia 2026. Info venue, tanggal, jam, harga tiket, dan mana yang sudah confirmed vs masih rumor." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">🎵</span>
+        <span>Konser<strong>Indo</strong></span>
+      </a>
+      <div class="nav-links">
+        <a href="#concerts">Konser</a>
+        <a href="#upcoming">Mendatang</a>
+        <a href="#venues">Venue</a>
+        <a href="#about">Tentang</a>
+      </div>
+      <div class="nav-cta">
+        <span class="badge-live">🔴 Live Update</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="hero-orb orb-1"></div>
+      <div class="hero-orb orb-2"></div>
+      <div class="hero-orb orb-3"></div>
+      <div class="hero-grid"></div>
+    </div>
+    <div class="container hero-content">
+      <div class="hero-badge">🇮🇩 Indonesia 2025 – 2027</div>
+      <h1 class="hero-title">
+        Semua Konser<br />
+        <span class="gradient-text">Internasional</span><br />
+        di Satu Tempat
+      </h1>
+      <p class="hero-sub">
+        Info lengkap venue, tanggal, jam, dan harga tiket — lengkap dengan
+        label <strong>Confirmed ✅</strong> vs <strong>Rumor 🔮</strong> agar kamu tidak tertipu.
+      </p>
+      <div class="hero-search">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Cari artis, venue, kota..." />
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num" id="totalConcerts">11</span><span class="stat-label">Total Konser</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num confirmed-stat" id="confirmedCount">3</span><span class="stat-label">✅ Confirmed</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num rumor-stat" id="rumorCount">4</span><span class="stat-label">🔮 Rumor</span></div>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Scroll untuk lihat konser</span>
+      <div class="scroll-arrow">↓</div>
+    </div>
+  </section>
+
+  <!-- FILTER BAR -->
+  <section class="filter-section" id="concerts">
+    <div class="container">
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">Semua</button>
+        <button class="filter-btn filter-confirmed" data-filter="confirmed">✅ Confirmed</button>
+        <button class="filter-btn filter-rumor" data-filter="rumor">🔮 Rumor</button>
+        <button class="filter-btn" data-filter="kpop">K-Pop</button>
+        <button class="filter-btn" data-filter="pop">Pop / R&amp;B</button>
+        <button class="filter-btn" data-filter="rock">Rock / Metal</button>
+        <button class="filter-btn" data-filter="jazz">Jazz</button>
+        <button class="filter-btn" data-filter="upcoming">Mendatang</button>
+        <button class="filter-btn" data-filter="past">Sudah Lewat</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONCERT CARDS -->
+  <section class="concerts-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Jadwal Konser <span class="gradient-text">2025–2027</span></h2>
+        <p>Data dari sumber resmi. ✅ = Confirmed resmi &nbsp;|&nbsp; 🔮 = Rumor / belum dikonfirmasi</p>
+      </div>
+      <div class="concerts-grid" id="concertsGrid"></div>
+      <div class="no-result hidden" id="noResult">
+        <p>😔 Tidak ada konser yang cocok dengan pencarian kamu.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPCOMING HIGHLIGHT -->
+  <section class="highlight-section" id="upcoming">
+    <div class="container">
+      <div class="section-header">
+        <h2>🔥 Paling Ditunggu-tunggu</h2>
+        <p>Konser mendatang yang jangan sampai kamu lewatkan</p>
+      </div>
+      <div class="highlights-row" id="highlightsRow"></div>
+    </div>
+  </section>
+
+  <!-- LEGEND -->
+  <section class="legend-section">
+    <div class="container">
+      <div class="legend-box">
+        <h3>📖 Panduan Status Konser</h3>
+        <div class="legend-grid">
+          <div class="legend-item">
+            <span class="badge badge-status-upcoming">✅ Confirmed</span>
+            <p>Diumumkan resmi oleh artis, manajemen, atau promotor. Tiket sudah/sedang dijual di platform resmi.</p>
+          </div>
+          <div class="legend-item">
+            <span class="badge badge-status-rumor">🔮 Rumor</span>
+            <p>Beredar di media sosial atau media hiburan, namun BELUM ada pernyataan resmi. Jangan beli tiket dari calo!</p>
+          </div>
+          <div class="legend-item">
+            <span class="badge badge-status-past">Sudah Lewat</span>
+            <p>Konser telah selesai digelar. Data disimpan sebagai referensi historis.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VENUE INFO -->
+  <section class="venues-section" id="venues">
+    <div class="container">
+      <div class="section-header">
+        <h2>📍 Venue Populer</h2>
+        <p>Lokasi konser internasional favorit di Indonesia</p>
+      </div>
+      <div class="venues-grid">
+        <div class="venue-card">
+          <div class="venue-icon">🏟️</div>
+          <h3>Gelora Bung Karno (GBK)</h3>
+          <p>Jl. Pintu 1 Senayan, Jakarta Pusat</p>
+          <span class="venue-cap">Kapasitas ~80.000</span>
+        </div>
+        <div class="venue-card">
+          <div class="venue-icon">🏛️</div>
+          <h3>Jakarta International Stadium (JIS)</h3>
+          <p>Tanjung Priok, Jakarta Utara</p>
+          <span class="venue-cap">Kapasitas ~82.000</span>
+        </div>
+        <div class="venue-card">
+          <div class="venue-icon">🎪</div>
+          <h3>NICE PIK2</h3>
+          <p>Pantai Indah Kapuk 2, Tangerang</p>
+          <span class="venue-cap">Indoor Convention</span>
+        </div>
+        <div class="venue-card">
+          <div class="venue-icon">🏢</div>
+          <h3>ICE BSD City</h3>
+          <p>BSD City, Tangerang Selatan</p>
+          <span class="venue-cap">Multi-Hall Expo</span>
+        </div>
+        <div class="venue-card">
+          <div class="venue-icon">⚓</div>
+          <h3>Beach City Intl Stadium</h3>
+          <p>Ancol, Jakarta Utara</p>
+          <span class="venue-cap">Kapasitas ~30.000</span>
+        </div>
+        <div class="venue-card">
+          <div class="venue-icon">🎡</div>
+          <h3>Pantai Carnaval Ancol</h3>
+          <p>Ancol, Jakarta Utara</p>
+          <span class="venue-cap">Festival Outdoor</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about-section" id="about">
+    <div class="container">
+      <div class="about-content">
+        <div class="about-text">
+          <h2>Tentang <span class="gradient-text">KonserIndo</span></h2>
+          <p>KonserIndo hadir sebagai sumber informasi terpercaya untuk fans musik di Indonesia. Kami mengumpulkan dan memverifikasi data dari promotor resmi, platform tiket, dan media terpercaya.</p>
+          <p>Yang membedakan kami: kami jelas memberi label mana yang <strong>Confirmed</strong> dan mana yang masih <strong>Rumor</strong> — agar kamu tidak tertipu calo atau info palsu.</p>
+          <div class="about-sources">
+            <span>Sumber data:</span>
+            <div class="source-tags">
+              <span>iMe Indonesia</span><span>Live Nation Asia</span><span>Loket.com</span>
+              <span>tiket.com</span><span>Tempo.co</span><span>Weverse</span><span>Billboard</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-visual">
+          <div class="about-card"><div class="about-number">✅</div><p>Data terverifikasi dari sumber resmi promotor</p></div>
+          <div class="about-card"><div class="about-number">🔮</div><p>Rumor diberi label jelas agar fans tidak tertipu</p></div>
+          <div class="about-card"><div class="about-number">🔄</div><p>Diupdate berkala setiap ada pengumuman baru</p></div>
+          <div class="about-card"><div class="about-number">🎫</div><p>Link langsung ke platform tiket resmi</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-logo">
+        <a href="index.html" class="logo"><span class="logo-icon">🎵</span><span>Konser<strong>Indo</strong></span></a>
+        <p>Jadwal konser internasional terlengkap di Indonesia</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navigasi</h4>
+        <a href="#concerts">Semua Konser</a>
+        <a href="#upcoming">Mendatang</a>
+        <a href="#about">Tentang Kami</a>
+      </div>
+      <div class="footer-links">
+        <h4>Tiket Resmi</h4>
+        <a href="https://loket.com" target="_blank" rel="noopener">Loket.com</a>
+        <a href="https://tiket.com" target="_blank" rel="noopener">tiket.com</a>
+        <a href="https://tix.id" target="_blank" rel="noopener">TIX.ID</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 KonserIndo — Data diupdate berkala. Disclaimer: Selalu verifikasi ke platform resmi. Harga tiket dapat berubah sewaktu-waktu.</p>
+    </div>
+  </footer>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div class="modal-content" id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
