@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.list-concert-tour.web.id/sitemap.xml
