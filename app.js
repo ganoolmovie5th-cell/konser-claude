@@ -344,6 +344,8 @@ const CONCERTS = [
     lineup: ['Steve Lacy', 'Rex Orange County', 'The Flaming Lips', 'Two Door Cinema Club', 'Kodaline', 'HONNE', 'BE:FIRST', 'Astrid S', 'Jordan Rakei', 'Matt Maltese', 'Flo'],
     sources: ['lalalafest.com', 'tokyohive.com', 'billboardphilippines.com'],
   },
+  {
+    id: 'the-weeknd-jakarta-2026',
     artist: 'The Weeknd',
     tour: '"After Hours Til Dawn" Stadium Tour Asia',
     genre: 'pop', emoji: '🌙',
