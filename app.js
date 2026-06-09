@@ -8,6 +8,29 @@
 
 const TODAY = new Date('2026-06-09');
 
+/* ============================================
+   ARTIST IMAGES — Wikimedia Commons CC-licensed
+   Untuk artis tanpa foto Wikimedia, gunakan
+   gradient CSS (imageUrl: null)
+   ============================================ */
+const ARTIST_IMAGES = {
+  'blackpink-deadline-2025':      'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/170514_BLACKPINK_at_YG_x_UNICEF_Walking_Festival_07.jpg/600px-170514_BLACKPINK_at_YG_x_UNICEF_Walking_Festival_07.jpg',
+  'bts-jakarta-2026':             'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/WikiPortraits_Studio_BTS_at_Sundance_2024.jpg/600px-WikiPortraits_Studio_BTS_at_Sundance_2024.jpg',
+  'avenged-sevenfold-jakarta-2026': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Avenged_Sevenfold_%2832468305786%29_%28cropped%29.jpg/600px-Avenged_Sevenfold_%2832468305786%29_%28cropped%29.jpg',
+  'the-weeknd-jakarta-2026':      'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/The_Weeknd_Portrait_by_Brian_Ziff.jpg/600px-The_Weeknd_Portrait_by_Brian_Ziff.jpg',
+  'mcr-hammersonic-2026':         'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/My_Chemical_Romance_lights.jpg/600px-My_Chemical_Romance_lights.jpg',
+  'mcr-jis-2026':                 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/My_Chemical_Romance_lights.jpg/600px-My_Chemical_Romance_lights.jpg',
+  'dream-theater-2026':           'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Dream_Theater_-_Wacken_Open_Air_2015_-_Wacken-7698.jpg/600px-Dream_Theater_-_Wacken_Open_Air_2015_-_Wacken-7698.jpg',
+  'laufey-jakarta-2026':          'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Laufey_in_2023.jpg/600px-Laufey_in_2023.jpg',
+  'green-day-jakarta-2025':       'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Green_Day_Live_in_Singapore_2010.jpg/600px-Green_Day_Live_in_Singapore_2010.jpg',
+  'ateez-2026':                   'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/ATEEZ_at_KCON_LA_2023_%28cropped%29.jpg/600px-ATEEZ_at_KCON_LA_2023_%28cropped%29.jpg',
+  'the-neighbourhood-jakarta-2026': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/The_Neighbourhood_-_03-28-2014_%2813623028734%29.jpg/600px-The_Neighbourhood_-_03-28-2014_%2813623028734%29.jpg',
+  'bryan-adams-jakarta-2026':     'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Bryan_Adams_in_2019.jpg/600px-Bryan_Adams_in_2019.jpg',
+  'five-sos-jakarta-2026':        'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/5_Seconds_of_Summer_at_the_iHeartRadio_Music_Festival_%28cropped%29.jpg/600px-5_Seconds_of_Summer_at_the_iHeartRadio_Music_Festival_%28cropped%29.jpg',
+  'java-jazz-2026':               'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Jon_Batiste_%2852944193773%29_%28cropped%29.jpg/600px-Jon_Batiste_%2852944193773%29_%28cropped%29.jpg',
+  'lalala-fest-2026':             'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Steve_Lacy_Primavera_Sound_2023_%28cropped%29.jpg/600px-Steve_Lacy_Primavera_Sound_2023_%28cropped%29.jpg',
+};
+
 const CONCERTS = [
 
   /* ════════ PAST CONCERTS ════════ */
@@ -612,6 +635,10 @@ const genreLabel = g => ({ kpop:'K-Pop', pop:'Pop / R&B', rock:'Rock / Metal', j
 /* ============================================
    RENDER CARDS
    ============================================ */
+function getArtistImage(id) {
+  return ARTIST_IMAGES[id] || null;
+}
+
 function renderCards(list) {
   const grid     = document.getElementById('concertsGrid');
   const noResult = document.getElementById('noResult');
@@ -631,11 +658,15 @@ function renderCards(list) {
     const priceDisplay = c.priceMin > 0
       ? `Rp ${(c.priceMin/1e6).toFixed(1).replace('.0','')}jt – Rp ${(c.priceMax/1e6).toFixed(1).replace('.0','')}jt`
       : rumor ? '⚠️ Belum diumumkan' : c.priceRange;
+    const img = getArtistImage(c.id);
+    const cardBgStyle = img
+      ? `style="background-image:url('${img}');background-size:cover;background-position:center top;"`
+      : '';
 
     return `
       <div class="concert-card${past?' past':''}${rumor?' rumor-card':''}" onclick="openModal('${c.id}')">
-        <div class="card-header">
-          <div class="card-bg">${c.emoji}</div>
+        <div class="card-header${img?' has-photo':''}" ${cardBgStyle}>
+          ${!img ? `<div class="card-bg-emoji">${c.emoji}</div>` : ''}
           <div class="card-overlay"></div>
           <div class="card-badges">
             <span class="badge badge-genre-${c.genre}">${genreLabel(c.genre)}</span>
@@ -681,14 +712,23 @@ function renderHighlights() {
   const row   = document.getElementById('highlightsRow');
   const picks = CONCERTS.filter(c => !isPast(c)).slice(0, 5);
 
-  row.innerHTML = picks.map(c => `
-    <div class="highlight-card${isRumor(c)?' highlight-rumor':''}" onclick="openModal('${c.id}')">
-      <span class="hl-emoji">${c.emoji}</span>
-      <div class="hl-artist">${c.artist}</div>
-      ${isRumor(c) ? '<div class="hl-rumor-badge">🔮 Rumor</div>' : ''}
-      <div class="hl-date">📅 ${c.dates[0]}</div>
-      <div class="hl-desc">${c.venue} · ${c.city.split(',')[0]}</div>
-    </div>`).join('');
+  row.innerHTML = picks.map(c => {
+    const img = getArtistImage(c.id);
+    const bgStyle = img
+      ? `style="background-image:url('${img}');background-size:cover;background-position:center top;"`
+      : '';
+    return `
+    <div class="highlight-card${isRumor(c)?' highlight-rumor':''}${img?' has-photo':''}" onclick="openModal('${c.id}')" ${bgStyle}>
+      <div class="hl-overlay"></div>
+      <div class="hl-content">
+        ${!img ? `<span class="hl-emoji">${c.emoji}</span>` : ''}
+        <div class="hl-artist">${c.artist}</div>
+        ${isRumor(c) ? '<div class="hl-rumor-badge">🔮 Rumor</div>' : ''}
+        <div class="hl-date">📅 ${c.dates[0]}</div>
+        <div class="hl-desc">${c.venue} · ${c.city.split(',')[0]}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 /* ============================================
@@ -712,15 +752,21 @@ function openModal(id) {
     ? `<div class="rumor-detail-box"><div class="rumor-detail-title">🔮 Kenapa ini masih Rumor?</div><p>${c.rumorDetail}</p></div>`
     : '';
 
+  const img = getArtistImage(c.id);
+  const heroStyle = img ? `style="background-image:url('${img}');background-size:cover;background-position:center 20%;"` : '';
+
   document.getElementById('modalContent').innerHTML = `
-    <div class="modal-hero">
-      <span class="modal-emoji">${c.emoji}</span>
-      <div class="modal-artist">${c.artist}</div>
-      <div class="modal-tour">${c.tour}</div>
-      <div class="modal-badges">
-        <span class="badge badge-genre-${c.genre}">${genreLabel(c.genre)}</span>
-        <span class="badge badge-status-${past?'past':rumor?'rumor':'upcoming'}">${past?'Sudah Lewat':rumor?'🔮 Rumor':'✅ Confirmed'}</span>
-        ${c.hot ? '<span class="badge badge-hot">🔥 Hot</span>' : ''}
+    <div class="modal-hero${img ? ' modal-hero-photo' : ''}" ${heroStyle}>
+      ${img ? '<div class="modal-hero-overlay"></div>' : ''}
+      <div class="modal-hero-inner">
+        ${!img ? `<span class="modal-emoji">${c.emoji}</span>` : ''}
+        <div class="modal-artist">${c.artist}</div>
+        <div class="modal-tour">${c.tour}</div>
+        <div class="modal-badges">
+          <span class="badge badge-genre-${c.genre}">${genreLabel(c.genre)}</span>
+          <span class="badge badge-status-${past?'past':rumor?'rumor':'upcoming'}">${past?'Sudah Lewat':rumor?'🔮 Rumor':'✅ Confirmed'}</span>
+          ${c.hot ? '<span class="badge badge-hot">🔥 Hot</span>' : ''}
+        </div>
       </div>
     </div>
     ${rumorBoxHtml}

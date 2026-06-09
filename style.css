@@ -23,8 +23,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .nav-links { display: flex; gap: 32px; }
 .nav-links a { color: var(--text-sub); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
 .nav-links a:hover { color: var(--text); }
-.badge-live { font-size: 0.75rem; font-weight: 600; padding: 6px 12px; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.2); border-radius: 99px; animation: pulse-red 2s infinite; }
-@keyframes pulse-red { 0%,100%{opacity:1}50%{opacity:0.7} }
+.badge-live { font-size: 0.75rem; font-weight: 600; padding: 6px 12px; background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.25); border-radius: 99px; }
 
 /* HERO */
 .hero { position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px 0 80px; overflow: hidden; }
@@ -83,9 +82,11 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .concert-card.past:hover { opacity: 0.85; }
 .concert-card.rumor-card { border-color: rgba(245,158,11,0.2); }
 .concert-card.rumor-card:hover { border-color: rgba(245,158,11,0.4); box-shadow: 0 8px 32px rgba(245,158,11,0.1); }
-.card-header { position: relative; height: 160px; overflow: hidden; }
-.card-bg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 5rem; filter: blur(2px) brightness(0.6); transform: scale(1.1); }
-.card-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, var(--bg3) 100%); }
+.card-header { position: relative; height: 180px; overflow: hidden; background: var(--bg2); }
+.card-header.has-photo { height: 200px; }
+.card-bg-emoji { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 5rem; filter: blur(2px) brightness(0.6); transform: scale(1.1); }
+.card-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 50%, var(--bg3) 100%); }
+.card-header.has-photo .card-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.3) 40%, var(--bg3) 100%); }
 .card-badges { position: absolute; top: 16px; left: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
 .badge { font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.5px; }
 .badge-genre-kpop   { background: rgba(168,85,247,0.3); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); }
@@ -128,16 +129,19 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 /* HIGHLIGHTS */
 .highlight-section { padding: 80px 0; background: var(--bg2); }
 .highlights-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-.highlight-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
-.highlight-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #a855f7, #ec4899); }
+.highlight-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 0; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; min-height: 200px; display: flex; flex-direction: column; justify-content: flex-end; }
+.highlight-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #a855f7, #ec4899); z-index: 2; }
 .highlight-card.highlight-rumor::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
-.highlight-card:hover { border-color: rgba(168,85,247,0.3); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(168,85,247,0.15); }
-.highlight-card.highlight-rumor:hover { border-color: rgba(245,158,11,0.3); box-shadow: 0 8px 32px rgba(245,158,11,0.1); }
-.hl-emoji { font-size: 2.5rem; margin-bottom: 12px; display: block; }
-.hl-artist { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
-.hl-rumor-badge { font-size: 0.7rem; font-weight: 700; display: inline-block; padding: 2px 8px; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; border-radius: 99px; margin-bottom: 6px; }
-.hl-date { font-size: 0.82rem; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
-.hl-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+.highlight-card:hover { border-color: rgba(168,85,247,0.3); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(168,85,247,0.2); }
+.highlight-card.highlight-rumor:hover { border-color: rgba(245,158,11,0.3); box-shadow: 0 8px 32px rgba(245,158,11,0.15); }
+.highlight-card.has-photo { background-size: cover; background-position: center top; min-height: 220px; }
+.hl-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.1) 100%); z-index: 1; }
+.hl-content { position: relative; z-index: 2; padding: 20px; }
+.hl-emoji { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+.hl-artist { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+.hl-rumor-badge { font-size: 0.7rem; font-weight: 700; display: inline-block; padding: 2px 8px; background: rgba(245,158,11,0.25); border: 1px solid rgba(245,158,11,0.4); color: #fbbf24; border-radius: 99px; margin-bottom: 6px; }
+.hl-date { font-size: 0.82rem; color: #c084fc; font-weight: 600; margin-bottom: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }
+.hl-desc { font-size: 0.78rem; color: rgba(255,255,255,0.7); line-height: 1.5; }
 
 /* LEGEND */
 .legend-section { padding: 40px 0; }
@@ -193,9 +197,14 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .modal-close:hover { background: rgba(255,255,255,0.15); color: var(--text); }
 .modal-content { padding: 32px; }
 .modal-hero { text-align: center; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.modal-hero-photo { min-height: 220px; border-radius: 16px 16px 0 0; margin: -32px -32px 24px; padding: 32px 32px 28px; position: relative; display: flex; align-items: flex-end; justify-content: center; }
+.modal-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.2) 100%); border-radius: 16px 16px 0 0; }
+.modal-hero-inner { position: relative; z-index: 2; text-align: center; width: 100%; }
 .modal-emoji { font-size: 4rem; display: block; margin-bottom: 12px; }
 .modal-artist { font-family: var(--font-display); font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
+.modal-hero-photo .modal-artist { color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
 .modal-tour { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; }
+.modal-hero-photo .modal-tour { color: rgba(255,255,255,0.7); }
 .modal-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .rumor-detail-box { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px; }
 .rumor-detail-title { font-size: 0.8rem; font-weight: 700; color: #fbbf24; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
