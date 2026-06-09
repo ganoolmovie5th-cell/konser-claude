@@ -8,14 +8,15 @@
   --radius: 16px; --radius-sm: 10px;
   --shadow: 0 8px 32px rgba(0,0,0,0.5);
   --font: 'Inter', sans-serif; --font-display: 'Syne', sans-serif;
+  --navbar-h: 57px;
 }
 html { scroll-behavior: smooth; }
 body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
 /* NAVBAR */
-.navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 0; background: rgba(9,9,11,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); transition: all 0.3s; }
-.navbar.scrolled { padding: 12px 0; background: rgba(9,9,11,0.95); }
+.navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 12px 0; background: rgba(9,9,11,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); transition: all 0.3s; height: var(--navbar-h); display: flex; align-items: center; }
+.navbar.scrolled { background: rgba(9,9,11,0.98); }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .logo { display: flex; align-items: center; text-decoration: none; }
 .logo-img { height: 30px; width: auto; display: block; }
@@ -57,7 +58,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 @keyframes bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(6px)} }
 
 /* FILTER */
-.filter-section { padding: 32px 0 0; position: sticky; top: 64px; z-index: 90; background: var(--bg); border-bottom: 1px solid var(--border); }
+.filter-section { padding: 16px 0 0; position: sticky; top: var(--navbar-h); z-index: 90; background: var(--bg); border-bottom: 1px solid var(--border); }
 .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 16px; scrollbar-width: none; }
 .filter-bar::-webkit-scrollbar { display: none; }
 .filter-btn { flex-shrink: 0; padding: 8px 20px; border-radius: 99px; border: 1px solid var(--border); background: transparent; color: var(--text-sub); font-size: 0.85rem; font-weight: 500; font-family: var(--font); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
