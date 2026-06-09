@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a855f7"/>
+      <stop offset="100%" style="stop-color:#ec4899"/>
+    </linearGradient>
+    <linearGradient id="note" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#f0e6ff;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="64" height="64" rx="14" ry="14" fill="url(#bg)"/>
+
+  <!-- Subtle inner glow -->
+  <rect width="64" height="64" rx="14" ry="14" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+
+  <!-- Music note icon -->
+  <!-- Note head 1 (left) -->
+  <ellipse cx="18" cy="46" rx="7.5" ry="5.5" fill="url(#note)"/>
+  <!-- Note stem 1 -->
+  <rect x="24.5" y="18" width="3.5" height="28" rx="1.5" fill="url(#note)"/>
+
+  <!-- Note head 2 (right) -->
+  <ellipse cx="39" cy="40" rx="7.5" ry="5.5" fill="url(#note)"/>
+  <!-- Note stem 2 -->
+  <rect x="45.5" y="12" width="3.5" height="28" rx="1.5" fill="url(#note)"/>
+
+  <!-- Beam connecting stems -->
+  <rect x="24.5" y="18" width="24.5" height="4" rx="2" fill="url(#note)"/>
+</svg>
