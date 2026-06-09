@@ -232,7 +232,7 @@ const CONCERTS = [
       { name: 'VIP',   price: 'Rp 5.000.000' },
     ],
     confirmStatus: 'confirmed', hot: false,
-    description: 'EXO kembali ke Jakarta setelah bertahun-tahun! Tur EXO PLANET #6 EXhOrizon berlangsung 2 malam di Indonesia Arena. Lima member (Suho, Chanyeol, D.O., Kai, Sehun, Lay) tampil memukau di hadapan ribuan EXO-L Indonesia.',
+    description: 'EXO kembali ke Jakarta setelah bertahun-tahun! Tur EXO PLANET #6 EXhOrizon berlangsung 2 malam di Indonesia Arena. Enam member (Suho, Chanyeol, D.O., Kai, Sehun, Lay) tampil memukau di hadapan ribuan EXO-L Indonesia.',
     sources: ['cnbcindonesia.com', 'kapanlagi.com', 'indonesia.travel'],
   },
 
