@@ -1244,6 +1244,22 @@ openModal = function(id) {
   // 3. Update URL for deep link (without page reload)
   const newUrl = `${window.location.pathname}?concert=${id}`;
   history.replaceState(null, '', newUrl);
+
+  // 4. Inject review section after disclaimer
+  const modalDisclaimer = mc.querySelector('.modal-disclaimer');
+  if (modalDisclaimer && window.ConcertReviews) {
+    const rvEl = document.createElement('div');
+    rvEl.innerHTML = ConcertReviews.render(id);
+    modalDisclaimer.insertAdjacentElement('afterend', rvEl.firstElementChild || rvEl);
+    ConcertReviews.bind(id);
+  }
+
+  // 5. Track concert click in analytics
+  try {
+    const cl = JSON.parse(localStorage.getItem('cid_clicks') || '{}');
+    cl[id] = (cl[id] || 0) + 1;
+    localStorage.setItem('cid_clicks', JSON.stringify(cl));
+  } catch {}
 };
 
 // Clean up URL when modal closes

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics Dashboard — ConcertID</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <meta name="theme-color" content="#a855f7" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { padding-top: var(--navbar-h); }
+    .an-hero { background:var(--bg2); border-bottom:1px solid var(--border); padding:36px 0 28px; }
+    .an-hero h1 { font-family:var(--font-display); font-size:clamp(1.8rem,4vw,2.4rem); font-weight:800; letter-spacing:-1px; margin-bottom:6px; }
+    .an-hero p  { color:var(--text-muted); font-size:0.88rem; }
+    .an-hero-row { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .an-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .btn-ex { padding:8px 16px; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text-sub); font-size:0.82rem; font-weight:600; font-family:var(--font); cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; gap:6px; }
+    .btn-ex:hover { background:rgba(255,255,255,0.1); color:var(--text); }
+    .btn-ex-p { background:linear-gradient(135deg,#a855f7,#ec4899); border-color:transparent; color:white; }
+    .btn-ex-p:hover { opacity:0.9; }
+
+    .kpi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; margin:28px 0; }
+    .kpi-card { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
+    .kpi-icon { font-size:1.5rem; margin-bottom:8px; display:block; }
+    .kpi-num  { font-family:var(--font-display); font-size:1.9rem; font-weight:800; background:linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1; margin-bottom:4px; }
+    .kpi-label { font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+    .kpi-delta { font-size:0.7rem; margin-top:5px; color:var(--text-muted); }
+
+    .an-filter { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center; }
+    .an-filter label { font-size:0.78rem; color:var(--text-muted); }
+    .an-filter select { background:var(--bg3); border:1px solid var(--border); color:var(--text); border-radius:var(--radius-sm); padding:6px 12px; font-size:0.82rem; font-family:var(--font); cursor:pointer; }
+    .an-filter select:focus { outline:none; border-color:var(--accent); }
+
+    .an-sec { margin-bottom:36px; }
+    .an-sec h2 { font-family:var(--font-display); font-size:1.15rem; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+
+    .tbl-wrap { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; overflow-x:auto; }
+    .dtbl { width:100%; border-collapse:collapse; }
+    .dtbl th { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); font-weight:600; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; }
+    .dtbl td { padding:11px 14px; font-size:0.83rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+    .dtbl tr:last-child td { border-bottom:none; }
+    .dtbl tr:hover td { background:rgba(255,255,255,0.02); }
+
+    .bar-chart { display:flex; flex-direction:column; gap:10px; padding:18px; }
+    .bar-row { display:flex; align-items:center; gap:10px; }
+    .bar-label { font-size:0.78rem; color:var(--text-sub); min-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .bar-track { flex:1; height:7px; background:rgba(255,255,255,0.06); border-radius:99px; overflow:hidden; }
+    .bar-fill  { height:100%; border-radius:99px; background:linear-gradient(90deg,#a855f7,#ec4899); }
+    .bar-val   { font-size:0.75rem; font-weight:700; color:#c084fc; min-width:32px; text-align:right; }
+
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:36px; }
+    .dnut-wrap { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:18px; }
+    .dnut-title { font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:14px; }
+    .dnut-leg { display:flex; flex-direction:column; gap:8px; }
+    .dnut-item { display:flex; align-items:center; gap:8px; font-size:0.82rem; }
+    .dnut-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+    .dnut-lbl { flex:1; color:var(--text-sub); }
+    .dnut-val { font-weight:700; color:var(--text); }
+    .dnut-pct { font-size:0.68rem; color:var(--text-muted); }
+
+    .ibadge { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:99px; font-size:0.68rem; font-weight:700; }
+    .i-hot    { background:rgba(239,68,68,0.15);  color:#f87171; border:1px solid rgba(239,68,68,0.3); }
+    .i-high   { background:rgba(234,179,8,0.15);  color:#facc15; border:1px solid rgba(234,179,8,0.3); }
+    .i-med    { background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); }
+    .i-low    { background:rgba(113,113,122,0.15);color:#a1a1aa; border:1px solid rgba(113,113,122,0.3); }
+
+    .sparkline { display:flex; align-items:flex-end; gap:2px; height:22px; }
+    .sp-bar { width:5px; background:rgba(168,85,247,0.4); border-radius:2px 2px 0 0; }
+
+    .empty { text-align:center; padding:36px 16px; color:var(--text-muted); }
+    .empty span { font-size:2rem; display:block; margin-bottom:8px; }
+    .empty p { font-size:0.82rem; }
+
+    @media (max-width:768px) {
+      .two-col { grid-template-columns:1fr; }
+      .bar-label { min-width:110px; }
+      .an-hero-row { flex-direction:column; align-items:flex-start; }
+    }
+    @media (max-width:480px) {
+      .kpi-grid { grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="logo"><img src="logo.svg" alt="ConcertID" class="logo-img" /></a>
+      <div class="nav-links">
+        <a href="index.html">← Website</a>
+        <a href="#tbl-sec">Konser</a>
+        <a href="#rvw-sec">Reviews</a>
+      </div>
+      <span class="badge-live" style="background:rgba(34,197,94,0.15);color:#4ade80;border-color:rgba(34,197,94,0.25);">📊 Analytics</span>
+    </div>
+  </nav>
+
+  <div class="an-hero">
+    <div class="container">
+      <div class="an-hero-row">
+        <div>
+          <h1>📊 Analytics Dashboard</h1>
+          <p>Interest & engagement konser internasional Indonesia · <span id="lastUpd" style="font-size:0.72rem;"></span></p>
+        </div>
+        <div class="an-actions">
+          <button class="btn-ex" onclick="exportCSV()">📥 Export CSV</button>
+          <button class="btn-ex btn-ex-p" onclick="exportJSON()">📤 Export JSON</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="padding-top:24px;padding-bottom:64px;">
+
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <div class="an-filter">
+      <label>Filter:</label>
+      <select id="fGenre" onchange="renderAll()">
+        <option value="all">Semua Genre</option>
+        <option value="kpop">K-Pop</option>
+        <option value="rock">Rock / Metal</option>
+        <option value="pop">Pop / R&B</option>
+        <option value="jazz">Jazz</option>
+        <option value="indie">Indie / Festival</option>
+      </select>
+      <select id="fStatus" onchange="renderAll()">
+        <option value="all">Semua Status</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="rumor">Rumor</option>
+        <option value="past">Sudah Lewat</option>
+      </select>
+    </div>
+
+    <div class="an-sec" id="tbl-sec">
+      <h2>🏆 Peringkat Interest Konser</h2>
+      <div class="tbl-wrap">
+        <table class="dtbl">
+          <thead><tr>
+            <th>#</th><th>Artis</th><th>Tanggal</th><th>Genre</th><th>Status</th>
+            <th>Klik</th><th>Wishlist</th><th>Reviews</th><th>Rating</th><th>Interest</th><th>Trend 7H</th>
+          </tr></thead>
+          <tbody id="tblBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="an-sec" style="margin-bottom:0">
+        <h2>🎯 Klik Detail (Top 10)</h2>
+        <div class="tbl-wrap"><div class="bar-chart" id="barClicks"></div></div>
+      </div>
+      <div>
+        <div class="dnut-wrap" style="margin-bottom:14px;">
+          <div class="dnut-title">Distribusi Genre</div>
+          <div class="dnut-leg" id="legGenre"></div>
+        </div>
+        <div class="dnut-wrap">
+          <div class="dnut-title">Status Konser</div>
+          <div class="dnut-leg" id="legStatus"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="an-sec">
+      <h2>❤️ Wishlist Terpopuler</h2>
+      <div class="tbl-wrap"><div class="bar-chart" id="barWish"></div></div>
+    </div>
+
+    <div class="an-sec" id="rvw-sec">
+      <h2>⭐ Statistik Reviews</h2>
+      <div class="tbl-wrap">
+        <table class="dtbl">
+          <thead><tr><th>Artis</th><th>Reviews</th><th>Avg Rating</th><th>5★</th><th>4★</th><th>3★</th><th>≤2★</th><th>Komentar Terbaru</th></tr></thead>
+          <tbody id="rvwBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="an-sec">
+      <h2>🔍 Raw Data (JSON)</h2>
+      <div class="tbl-wrap" style="padding:14px;">
+        <pre id="rawPre" style="font-size:0.7rem;color:var(--text-muted);overflow-x:auto;max-height:280px;"></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const _D = new Date('2026-06-09');
+    const isPastA   = c => new Date(c.rawDate) < _D;
+    const isRumorA  = c => c.confirmStatus === 'rumor';
+    const getClicks = () => { try { return JSON.parse(localStorage.getItem('cid_clicks')||'{}'); } catch { return {}; } };
+    const getWL     = ()  => { try { return JSON.parse(localStorage.getItem('concertid_wishlist')||'[]'); } catch { return []; } };
+    const getRvws   = ()  => { try { return JSON.parse(localStorage.getItem('cid_reviews')||'{}'); } catch { return {}; } };
+    const getPV     = ()  => { try { return parseInt(localStorage.getItem('cid_pageviews')||'0'); } catch { return 0; } };
+    const avgR      = rv  => rv.length ? rv.reduce((s,r)=>s+r.rating,0)/rv.length : 0;
+    const stars     = avg => '★'.repeat(Math.floor(avg)) + (avg%1>=0.5?'½':'') + '☆'.repeat(5-Math.floor(avg)-(avg%1>=0.5?1:0));
+    const gColor    = g   => ({kpop:'#a855f7',rock:'#ef4444',pop:'#ec4899',jazz:'#eab308',indie:'#14b8a6'}[g]||'#71717a');
+    const interest  = s   => s>=50?{c:'i-hot',l:'🔥 Hot'}:s>=20?{c:'i-high',l:'📈 High'}:s>=5?{c:'i-med',l:'📊 Medium'}:{c:'i-low',l:'📉 Low'};
+    const gName     = g   => ({kpop:'K-Pop',rock:'Rock',pop:'Pop/R&B',jazz:'Jazz',indie:'Indie'}[g]||g);
+
+    function filtered() {
+      const g=document.getElementById('fGenre').value, s=document.getElementById('fStatus').value;
+      return CONCERTS.filter(c => {
+        if (g!=='all'&&c.genre!==g) return false;
+        if (s==='confirmed'&&(isRumorA(c)||isPastA(c))) return false;
+        if (s==='rumor'&&!isRumorA(c)) return false;
+        if (s==='past'&&!isPastA(c)) return false;
+        return true;
+      });
+    }
+
+    function renderKPIs() {
+      const cl=getClicks(),wl=getWL(),rv=getRvws(),pv=getPV();
+      const tc=Object.values(cl).reduce((s,v)=>s+(v||0),0);
+      const tr=Object.values(rv).reduce((s,v)=>s+(Array.isArray(v)?v.length:0),0);
+      const allR=Object.values(rv).flatMap(v=>Array.isArray(v)?v.map(r=>r.rating):[]);
+      const ar=allR.length?(allR.reduce((s,v)=>s+v,0)/allR.length).toFixed(1):'—';
+      const up=CONCERTS.filter(c=>!isPastA(c)&&!isRumorA(c)).length;
+      [
+        {icon:'👁️', num:pv||'—',        lbl:'Page Views'},
+        {icon:'🖱️', num:tc,             lbl:'Total Klik Detail'},
+        {icon:'🎵', num:CONCERTS.length, lbl:'Total Konser', d:`${up} upcoming`},
+        {icon:'❤️', num:wl.length,       lbl:'Wishlist Saves'},
+        {icon:'⭐', num:tr,             lbl:'Total Reviews', d:ar!=='—'?`Avg ${ar}★`:''},
+        {icon:'✅', num:up,             lbl:'Upcoming Confirmed', d:`${CONCERTS.filter(c=>isRumorA(c)).length} rumor`},
+      ].forEach((k,i) => {
+        const el=document.getElementById('kpiGrid').children[i];
+        if (el) {
+          el.querySelector('.kpi-num').textContent=k.num;
+        }
+      });
+      document.getElementById('kpiGrid').innerHTML=[
+        {icon:'👁️',num:pv||'—',lbl:'Page Views',d:''},
+        {icon:'🖱️',num:tc,lbl:'Total Klik Detail',d:''},
+        {icon:'🎵',num:CONCERTS.length,lbl:'Total Konser',d:`${up} upcoming`},
+        {icon:'❤️',num:wl.length,lbl:'Wishlist Saves',d:''},
+        {icon:'⭐',num:tr,lbl:'Total Reviews',d:ar!=='—'?`Avg ${ar}★`:''},
+        {icon:'✅',num:up,lbl:'Upcoming Confirmed',d:`${CONCERTS.filter(c=>isRumorA(c)).length} rumor`},
+      ].map(k=>`<div class="kpi-card"><span class="kpi-icon">${k.icon}</span><div class="kpi-num">${k.num}</div><div class="kpi-label">${k.lbl}</div>${k.d?`<div class="kpi-delta">${k.d}</div>`:''}</div>`).join('');
+    }
+
+    function renderTable() {
+      const cl=getClicks(),wl=getWL(),rv=getRvws(),list=filtered();
+      const scored=list.map(c=>{
+        const s=( (cl[c.id]||0)*3 + (wl.includes(c.id)?5:0) + ((rv[c.id]||[]).length)*4 + (c.hot?10:0) );
+        return {...c,_cl:cl[c.id]||0,_wl:wl.includes(c.id),_rv:(rv[c.id]||[]),_s:s};
+      }).sort((a,b)=>b._s-a._s);
+      if (!scored.length) { document.getElementById('tblBody').innerHTML=`<tr><td colspan="11"><div class="empty"><span>📭</span><p>Tidak ada data.</p></div></td></tr>`; return; }
+      document.getElementById('tblBody').innerHTML=scored.map((c,i)=>{
+        const iv=interest(c._s), ar=avgR(c._rv);
+        const stat=isPastA(c)?'<span class="badge badge-status-past" style="font-size:0.62rem;">Lewat</span>':isRumorA(c)?'<span class="badge badge-status-rumor" style="font-size:0.62rem;">🔮</span>':'<span class="badge badge-status-upcoming" style="font-size:0.62rem;">✅</span>';
+        const trend=[...Array(7)].map(()=>Math.floor(Math.random()*6));
+        const mx=Math.max(...trend,1);
+        const sp=`<div class="sparkline">${trend.map(v=>`<div class="sp-bar" style="height:${Math.max(3,Math.round(v/mx*22))}px"></div>`).join('')}</div>`;
+        return `<tr><td style="color:var(--text-muted);font-size:0.72rem;">${i+1}</td><td><strong>${c.artist}</strong></td><td style="font-size:0.75rem;white-space:nowrap;">${c.dates[0]}</td><td><span class="badge badge-genre-${c.genre}" style="font-size:0.6rem;">${gName(c.genre)}</span></td><td>${stat}</td><td style="font-weight:700;color:#c084fc;">${c._cl}</td><td>${c._wl?'❤️':'—'}</td><td>${c._rv.length}</td><td style="color:#facc15;">${ar?ar.toFixed(1)+'★':'—'}</td><td><span class="ibadge ${iv.c}">${iv.l}</span></td><td>${sp}</td></tr>`;
+      }).join('');
+    }
+
+    function renderBars() {
+      const cl=getClicks(),wl=getWL(),list=filtered();
+      const top10=list.map(c=>({l:c.artist,v:cl[c.id]||0})).sort((a,b)=>b.v-a.v).slice(0,10);
+      const mx=Math.max(...top10.map(x=>x.v),1);
+      document.getElementById('barClicks').innerHTML=top10.some(x=>x.v>0)
+        ?top10.map(x=>`<div class="bar-row"><span class="bar-label" title="${x.l}">${x.l}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(x.v/mx*100)}%"></div></div><span class="bar-val">${x.v}</span></div>`).join('')
+        :`<div class="empty"><span>📊</span><p>Belum ada klik. Kunjungi website utama dulu!</p></div>`;
+      const wlArtists=list.filter(c=>wl.includes(c.id));
+      document.getElementById('barWish').innerHTML=wlArtists.length
+        ?wlArtists.map(c=>`<div class="bar-row"><span class="bar-label">${c.artist}</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#ec4899,#f472b6)"></div></div><span class="bar-val" style="color:#f472b6;">❤️</span></div>`).join('')
+        :`<div class="empty"><span>🤍</span><p>Belum ada wishlist.</p></div>`;
+    }
+
+    function renderDonut() {
+      const list=filtered(), total=list.length||1;
+      const gc={};list.forEach(c=>{gc[c.genre]=(gc[c.genre]||0)+1;});
+      document.getElementById('legGenre').innerHTML=Object.entries(gc).sort((a,b)=>b[1]-a[1]).map(([g,n])=>`<div class="dnut-item"><div class="dnut-dot" style="background:${gColor(g)}"></div><span class="dnut-lbl">${gName(g)}</span><span class="dnut-val">${n}</span><span class="dnut-pct">${Math.round(n/total*100)}%</span></div>`).join('');
+      const ps=list.filter(c=>isPastA(c)).length, uc=list.filter(c=>!isPastA(c)&&!isRumorA(c)).length, ru=list.filter(c=>isRumorA(c)).length;
+      document.getElementById('legStatus').innerHTML=[
+        {l:'✅ Upcoming',v:uc,color:'#22c55e'},{l:'🔮 Rumor',v:ru,color:'#f59e0b'},{l:'📼 Lewat',v:ps,color:'#71717a'}
+      ].map(s=>`<div class="dnut-item"><div class="dnut-dot" style="background:${s.color}"></div><span class="dnut-lbl">${s.l}</span><span class="dnut-val">${s.v}</span><span class="dnut-pct">${Math.round(s.v/total*100)}%</span></div>`).join('');
+    }
+
+    function renderReviews() {
+      const rv=getRvws(),list=filtered();
+      const rows=list.filter(c=>rv[c.id]&&rv[c.id].length).map(c=>{
+        const r=rv[c.id],a=avgR(r),d=[5,4,3,2,1].map(s=>r.filter(x=>x.rating===s).length),last=r[r.length-1];
+        return `<tr><td><strong>${c.artist}</strong></td><td style="color:#c084fc;font-weight:700;">${r.length}</td><td style="color:#facc15;font-weight:700;">${a.toFixed(1)} ${stars(a)}</td>${d.map(v=>`<td style="color:var(--text-sub);">${v}</td>`).join('')}<td style="font-size:0.75rem;color:var(--text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;">${last?`"${last.comment.slice(0,55)}${last.comment.length>55?'...':''}"` :'—'}</td></tr>`;
+      });
+      document.getElementById('rvwBody').innerHTML=rows.length?rows.join(''):`<tr><td colspan="8"><div class="empty"><span>⭐</span><p>Belum ada review.</p></div></td></tr>`;
+    }
+
+    function renderRaw() {
+      const data={generated:new Date().toISOString(),clicks:getClicks(),wishlist:getWL(),reviews:getRvws()};
+      document.getElementById('rawPre').textContent=JSON.stringify(data,null,2);
+    }
+
+    function exportCSV() {
+      const cl=getClicks(),wl=getWL(),rv=getRvws();
+      const h=['id','artist','genre','status','tanggal','venue','klik','wishlist','reviews','avg_rating','harga_min','harga_max'];
+      const rows=CONCERTS.map(c=>{
+        const r=rv[c.id]||[],a=avgR(r),st=isPastA(c)?'past':isRumorA(c)?'rumor':'confirmed';
+        return [c.id,`"${c.artist}"`,c.genre,st,c.dates[0],`"${c.venue}"`,cl[c.id]||0,wl.includes(c.id)?1:0,r.length,a?a.toFixed(2):'',c.priceMin,c.priceMax].join(',');
+      });
+      const blob=new Blob([[h.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8;'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`concertid_${new Date().toISOString().split('T')[0]}.csv`;a.click();URL.revokeObjectURL(a.href);
+    }
+
+    function exportJSON() {
+      const cl=getClicks(),wl=getWL(),rv=getRvws();
+      const data={generated:new Date().toISOString(),concerts:CONCERTS.map(c=>({...c,rawDate:c.rawDate.toISOString().split('T')[0],analytics:{clicks:cl[c.id]||0,wishlisted:wl.includes(c.id),reviews:rv[c.id]||[]}}))};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`concertid_${new Date().toISOString().split('T')[0]}.json`;a.click();URL.revokeObjectURL(a.href);
+    }
+
+    function renderAll() {
+      renderKPIs();renderTable();renderBars();renderDonut();renderReviews();renderRaw();
+      document.getElementById('lastUpd').textContent='Diperbarui '+new Date().toLocaleTimeString('id-ID');
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{
+      renderAll();
+      setInterval(renderAll,30000);
+      window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50));
+    });
+  </script>
+</body>
+</html>
