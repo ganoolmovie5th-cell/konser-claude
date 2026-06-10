@@ -206,20 +206,9 @@ const SocialFeatures = (() => {
     try { return JSON.parse(localStorage.getItem(KEY_MYVOTE) || '{}'); } catch { return {}; }
   }
 
-  function getGoingCount(id)      { return getCounts(KEY_GOING)[id]    || getDefaultCount(id, 'going'); }
-  function getInterestCount(id)   { return getCounts(KEY_INTEREST)[id] || getDefaultCount(id, 'interest'); }
-  function getMyVote(id)          { return getMyVotes()[id] || null; }
-
-  // Seed a realistic starting count based on concert popularity
-  function getDefaultCount(id, type) {
-    const concert = typeof CONCERTS !== 'undefined' ? CONCERTS.find(c => c.id === id) : null;
-    if (!concert) return 0;
-    const base = concert.hot ? 1200 : 400;
-    const hash = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-    return type === 'going'
-      ? base + (hash % 800)
-      : Math.round((base + (hash % 800)) * 1.5);
-  }
+  function getGoingCount(id)    { return getCounts(KEY_GOING)[id]    ?? 0; }
+  function getInterestCount(id) { return getCounts(KEY_INTEREST)[id] ?? 0; }
+  function getMyVote(id)        { return getMyVotes()[id] || null; }
 
   function vote(id, type) {
     const myVotes = getMyVotes();
@@ -228,9 +217,9 @@ const SocialFeatures = (() => {
     const going    = getCounts(KEY_GOING);
     const interest = getCounts(KEY_INTEREST);
 
-    // Init defaults
-    if (!going[id])    going[id]    = getDefaultCount(id, 'going');
-    if (!interest[id]) interest[id] = getDefaultCount(id, 'interest');
+    // Init dari 0 jika belum ada
+    if (going[id]    == null) going[id]    = 0;
+    if (interest[id] == null) interest[id] = 0;
 
     if (prev === type) {
       // Undo vote
@@ -544,58 +533,82 @@ const Discussion = (() => {
 })();
 window.Discussion = Discussion;
 
-/* ================================================================
-   9. TICKET PRICE AGGREGATOR — perbandingan harga antar platform
-   ================================================================ */
-function renderTicketAggregator(concert) {
-  if (concert.confirmStatus === 'rumor' || !concert.priceMin) return '';
-  const platforms = [
-    { name: 'tiket.com',  url: `https://tiket.com/event?q=${encodeURIComponent(concert.artist)}`, fee: '3%', color: '#2196f3', icon: '🎫' },
-    { name: 'Loket.com',  url: `https://loket.com/event?q=${encodeURIComponent(concert.artist)}`, fee: '2.5%', color: '#ff5722', icon: '🎟️' },
-    { name: 'TIX.ID',     url: `https://tix.id`,                                                 fee: '2%',  color: '#9c27b0', icon: '🏷️' },
-  ];
-  const rows = platforms.map(p => `
-    <a class="agg-row" href="${p.url}" target="_blank" rel="noopener">
-      <span class="agg-icon">${p.icon}</span>
-      <span class="agg-platform">${p.name}</span>
-      <span class="agg-price">Rp ${(concert.priceMin/1e6).toFixed(1)}jt+</span>
-      <span class="agg-fee">Fee ~${p.fee}</span>
-      <span class="agg-cta">Cek →</span>
-    </a>`).join('');
-  return `
-    <div class="ticket-aggregator">
-      <h4>💡 Bandingkan Platform Tiket</h4>
-      <div class="agg-list">${rows}</div>
-      <p class="agg-disclaimer">* Harga dan ketersediaan bisa berbeda. Selalu cek platform resmi.</p>
-    </div>`;
-}
+
 
 /* ================================================================
-   10. USER-GENERATED CONTENT — foto setelah konser
+   10. USER-GENERATED CONTENT — foto setelah konser (file upload)
    ================================================================ */
 const UGC = (() => {
-  const KEY = 'cid_ugc';
+  const KEY      = 'cid_ugc';
+  const MAX_SIZE = 2 * 1024 * 1024; // 2 MB max per foto
+  const MAX_DIM  = 1200;            // resize jika > 1200px
 
   function getAll() {
     try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; }
   }
-  function saveAll(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
+  function saveAll(d) {
+    try { localStorage.setItem(KEY, JSON.stringify(d)); return true; }
+    catch (e) {
+      // localStorage penuh — hapus foto paling lama
+      showToast('⚠️ Storage penuh, foto lama dihapus otomatis.', 'error', 4000);
+      return false;
+    }
+  }
   function getFor(id) { return getAll()[id] || []; }
 
-  function addPhoto(concertId, { caption, url, author }) {
-    if (!url) return { ok: false, msg: 'URL foto tidak valid.' };
+  /* Resize & compress image ke canvas → base64 JPEG */
+  function processFile(file) {
+    return new Promise((resolve, reject) => {
+      if (!file.type.startsWith('image/')) return reject('Hanya file gambar yang diizinkan.');
+      if (file.size > MAX_SIZE) return reject('Ukuran file maks 2 MB.');
+
+      const reader = new FileReader();
+      reader.onerror = () => reject('Gagal membaca file.');
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onerror = () => reject('Gagal memuat gambar.');
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > MAX_DIM || height > MAX_DIM) {
+            const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+            width  = Math.round(width  * ratio);
+            height = Math.round(height * ratio);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width  = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function addPhoto(concertId, { caption, dataUrl, author }) {
+    if (!dataUrl) return { ok: false, msg: 'Data foto tidak valid.' };
     const all = getAll();
     if (!all[concertId]) all[concertId] = [];
     if (all[concertId].length >= 20) return { ok: false, msg: 'Maksimal 20 foto per konser.' };
     all[concertId].unshift({
-      url: url.trim().slice(0, 500),
+      url: dataUrl,
       caption: (caption || '').trim().replace(/</g, '&lt;').slice(0, 100),
-      author: (author || 'Anonim').trim().slice(0, 30),
+      author:  (author  || 'Anonim').trim().slice(0, 30),
       date: new Date().toISOString(),
-      likes: 0,
     });
     saveAll(all);
     return { ok: true };
+  }
+
+  function renderGrid(photos) {
+    if (!photos.length) return `<div class="ugc-empty">Belum ada foto. Jadilah yang pertama berbagi! 📸</div>`;
+    return `<div class="ugc-grid">${photos.map(p => `
+      <div class="ugc-item">
+        <img src="${p.url}" alt="${p.caption || 'Foto konser'}" loading="lazy" />
+        ${p.caption ? `<div class="ugc-caption-text">${p.caption}</div>` : ''}
+        <div class="ugc-item-meta">${p.author} · ${new Date(p.date).toLocaleDateString('id-ID')}</div>
+      </div>`).join('')}</div>`;
   }
 
   function render(concertId) {
@@ -610,38 +623,91 @@ const UGC = (() => {
           ${photos.length ? `<span class="ugc-count">${photos.length} foto</span>` : ''}
         </div>
         ${past ? `
-          <form class="ugc-form" onsubmit="UGC.handleSubmit(event, '${concertId}')">
-            <input class="ugc-url" type="url" placeholder="URL foto (imgur, Google Drive, dll)" required />
-            <input class="ugc-caption" type="text" placeholder="Caption (opsional)" maxlength="100" />
-            <input class="ugc-author" type="text" placeholder="Nama kamu (opsional)" maxlength="30" />
-            <button class="ugc-submit" type="submit">Upload Foto</button>
-          </form>` : `<div class="ugc-not-yet">📸 Foto dapat ditambahkan setelah konser berlangsung.</div>`}
-        ${photos.length ? `
-          <div class="ugc-grid" id="ugcgrid_${concertId}">
-            ${photos.map((p, i) => `
-              <div class="ugc-item">
-                <img src="${p.url}" alt="${p.caption || 'Foto konser'}" loading="lazy" onerror="this.parentElement.style.display='none'" />
-                ${p.caption ? `<div class="ugc-caption-text">${p.caption}</div>` : ''}
-                <div class="ugc-item-meta">${p.author} · <span>${new Date(p.date).toLocaleDateString('id-ID')}</span></div>
-              </div>`).join('')}
-          </div>` : `<div class="ugc-empty">Belum ada foto. Jadilah yang pertama berbagi! 📸</div>`}
+          <div class="ugc-form" id="ugcform_${concertId}">
+            <label class="ugc-file-label" for="ugcfile_${concertId}">
+              <span class="ugc-file-icon">📁</span>
+              <span class="ugc-file-text">Pilih foto dari perangkat kamu</span>
+              <span class="ugc-file-hint">JPG / PNG / WebP · maks 2 MB</span>
+            </label>
+            <input class="ugc-file-input" id="ugcfile_${concertId}" type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onchange="UGC.handleFileChange(event, '${concertId}')" />
+            <div class="ugc-preview-wrap" id="ugcpreview_${concertId}" style="display:none">
+              <img class="ugc-preview-img" id="ugcpreviewimg_${concertId}" alt="preview" />
+              <div class="ugc-preview-fields">
+                <input class="ugc-caption" id="ugccaption_${concertId}" type="text"
+                  placeholder="Caption (opsional)" maxlength="100" />
+                <input class="ugc-author" id="ugcauthor_${concertId}" type="text"
+                  placeholder="Nama kamu (opsional)" maxlength="30" />
+                <div class="ugc-preview-actions">
+                  <button class="ugc-cancel" onclick="UGC.cancelPreview('${concertId}')">Batal</button>
+                  <button class="ugc-submit" onclick="UGC.confirmUpload('${concertId}')">Upload Foto</button>
+                </div>
+              </div>
+            </div>
+          </div>` : `<div class="ugc-not-yet">📸 Foto dapat ditambahkan setelah konser berlangsung.</div>`}
+        <div id="ugcgrid_${concertId}">${renderGrid(photos)}</div>
       </div>`;
   }
 
-  function handleSubmit(e, concertId) {
-    e.preventDefault();
-    const form    = e.target;
-    const url     = form.querySelector('.ugc-url')?.value || '';
-    const caption = form.querySelector('.ugc-caption')?.value || '';
-    const author  = form.querySelector('.ugc-author')?.value || '';
-    const result  = addPhoto(concertId, { url, caption, author });
-    if (!result.ok) { showToast('⚠️ ' + result.msg, 'error'); return; }
-    const section = document.getElementById(`ugc_${concertId}`);
-    if (section) section.outerHTML = render(concertId);
-    showToast('📸 Foto berhasil ditambahkan!', 'success');
+  // Saat user pilih file — tampilkan preview dulu
+  function handleFileChange(e, concertId) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('⚠️ Hanya file gambar yang diizinkan.', 'error'); return; }
+    if (file.size > MAX_SIZE) { showToast('⚠️ Ukuran file maks 2 MB.', 'error'); return; }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const previewWrap = document.getElementById(`ugcpreview_${concertId}`);
+      const previewImg  = document.getElementById(`ugcpreviewimg_${concertId}`);
+      if (previewWrap && previewImg) {
+        previewImg.src = ev.target.result;
+        previewWrap.style.display = 'flex';
+      }
+      // Simpan dataURL sementara di dataset
+      const label = document.querySelector(`#ugcform_${concertId} .ugc-file-label`);
+      if (label) label.dataset.pending = ev.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
-  return { render, handleSubmit, getFor };
+  // Batalkan preview
+  function cancelPreview(concertId) {
+    const previewWrap = document.getElementById(`ugcpreview_${concertId}`);
+    const fileInput   = document.getElementById(`ugcfile_${concertId}`);
+    if (previewWrap) previewWrap.style.display = 'none';
+    if (fileInput)   fileInput.value = '';
+  }
+
+  // Konfirmasi upload — compress lalu simpan
+  async function confirmUpload(concertId) {
+    const fileInput = document.getElementById(`ugcfile_${concertId}`);
+    const file      = fileInput?.files?.[0];
+    const caption   = document.getElementById(`ugccaption_${concertId}`)?.value || '';
+    const author    = document.getElementById(`ugcauthor_${concertId}`)?.value  || '';
+
+    if (!file) { showToast('⚠️ Pilih foto terlebih dahulu.', 'error'); return; }
+
+    const btn = document.querySelector(`#ugc_${concertId} .ugc-submit`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }
+
+    try {
+      const dataUrl = await processFile(file);
+      const result  = addPhoto(concertId, { dataUrl, caption, author });
+      if (!result.ok) { showToast('⚠️ ' + result.msg, 'error'); return; }
+
+      // Re-render section
+      const section = document.getElementById(`ugc_${concertId}`);
+      if (section) section.outerHTML = render(concertId);
+      showToast('📸 Foto berhasil ditambahkan!', 'success');
+    } catch (err) {
+      showToast('⚠️ ' + (typeof err === 'string' ? err : 'Gagal memproses foto.'), 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Upload Foto'; }
+    }
+  }
+
+  return { render, handleFileChange, cancelPreview, confirmUpload, getFor };
 })();
 window.UGC = UGC;
 
@@ -663,34 +729,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Seed price history for this concert
       PriceTracker.seedHistory(c);
 
-      // ── Google Calendar button ──
-      const gcUrl = getGoogleCalendarUrl(c);
-      const modalActions = mc.querySelector('.modal-actions');
-      if (modalActions && gcUrl) {
-        const gcBtn = document.createElement('a');
-        gcBtn.className = 'btn btn-secondary';
-        gcBtn.href = gcUrl;
-        gcBtn.target = '_blank';
-        gcBtn.rel = 'noopener';
-        gcBtn.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;';
-        gcBtn.innerHTML = `<svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Google Calendar`;
-        modalActions.appendChild(gcBtn);
-      }
-
-      // ── Notifikasi browser ──
-      if (!isPast(c) && !isRumor(c)) {
-        const notifRow = document.createElement('div');
-        notifRow.className = 'modal-notif-row';
-        const subscribed = BrowserNotif.isSubscribed(c.id);
-        notifRow.innerHTML = `
-          <button class="btn-notif${subscribed ? ' notif-active' : ''}" id="notifBtn_${c.id}"
-            onclick="BrowserNotif.toggle(CONCERTS.find(x=>x.id==='${c.id}'), this)">
-            ${subscribed ? '🔔 Diingatkan!' : '🔔 Ingatkan Saya'}
-          </button>`;
-        const disclaimer = mc.querySelector('.modal-disclaimer');
-        if (disclaimer) disclaimer.insertAdjacentElement('beforebegin', notifRow);
-      }
-
       // ── Social features (Going / Interested) ──
       const disclaimer = mc.querySelector('.modal-disclaimer');
       if (disclaimer) {
@@ -710,16 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // ── Ticket aggregator ──
-      const aggHtml = renderTicketAggregator(c);
-      if (aggHtml) {
-        const sources = mc.querySelector('.modal-sources');
-        if (sources) {
-          const aggEl = document.createElement('div');
-          aggEl.innerHTML = aggHtml;
-          sources.insertAdjacentElement('beforebegin', aggEl.firstElementChild || aggEl);
-        }
-      }
+      // ── Ticket aggregator — dihapus ──
 
       // ── Social media links ──
       const smHtml = SocialMedia.renderLinks(c.id, c.artist);
@@ -750,8 +779,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Check pending notifications on load
-  BrowserNotif.checkPending();
+  // Check pending notifications on load — dinonaktifkan (fitur dihapus)
+  // BrowserNotif.checkPending();
 
   // Render newsletter section if container exists
   const nlContainer = document.getElementById('newsletterFormContainer');

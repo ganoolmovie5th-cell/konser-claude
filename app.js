@@ -725,10 +725,10 @@ function renderCards(list) {
             ${!past && !rumor
               ? `<a class="btn btn-primary" href="${c.ticketUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🎫 Beli Tiket</a>`
               : rumor
-                ? `<button class="btn btn-rumor" onclick="openModal('${c.id}');event.stopPropagation()">🔮 Lihat Detail</button>`
+                ? `<button class="btn btn-rumor-disabled" disabled>🔮 Belum Dikonfirmasi</button>`
                 : `<button class="btn btn-disabled" disabled>Konser Selesai</button>`
             }
-            <button class="btn btn-secondary" onclick="openModal('${c.id}');event.stopPropagation()">Detail ›</button>
+            ${!rumor ? `<button class="btn btn-secondary" onclick="openModal('${c.id}');event.stopPropagation()">Detail ›</button>` : ''}
           </div>
         </div>
       </div>`;

@@ -1036,6 +1036,48 @@ html.light .ugc-url, html.light .ugc-caption, html.light .ugc-author { backgroun
 /* ── REVIEW SUBMIT BUTTON override ── */
 .rv-submit-btn { flex: 0 !important; padding: 8px 20px !important; font-size: 0.82rem !important; }
 
+/* ── TOMBOL RUMOR — Belum Dikonfirmasi (disabled) ── */
+.btn-rumor-disabled {
+  padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid rgba(245,158,11,0.25);
+  background: rgba(245,158,11,0.07); color: #92400e;
+  font-family: var(--font); font-size: 0.82rem; font-weight: 600;
+  cursor: not-allowed; opacity: 0.7; flex: 1;
+}
+html.dark .btn-rumor-disabled { color: #fbbf24; }
+
+/* ── UGC FILE UPLOAD ── */
+.ugc-file-label {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; padding: 20px; border: 2px dashed var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; transition: border-color 0.2s, background 0.2s; text-align: center;
+  background: rgba(255,255,255,0.02);
+}
+.ugc-file-label:hover { border-color: rgba(236,72,153,0.5); background: rgba(236,72,153,0.05); }
+.ugc-file-icon  { font-size: 1.8rem; }
+.ugc-file-text  { font-size: 0.88rem; font-weight: 600; color: var(--text-sub); }
+.ugc-file-hint  { font-size: 0.72rem; color: var(--text-muted); }
+.ugc-file-input { display: none; }
+
+.ugc-preview-wrap {
+  display: flex; gap: 12px; align-items: flex-start; margin-top: 10px;
+  padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.02);
+}
+.ugc-preview-img {
+  width: 100px; height: 100px; object-fit: cover;
+  border-radius: var(--radius-sm); flex-shrink: 0; border: 1px solid var(--border);
+}
+.ugc-preview-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.ugc-preview-actions { display: flex; gap: 8px; }
+.ugc-cancel {
+  padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: transparent; color: var(--text-muted); font-family: var(--font);
+  font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+}
+.ugc-cancel:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+html.light .ugc-file-label { background: rgba(0,0,0,0.02); }
+html.light .ugc-preview-wrap { background: rgba(0,0,0,0.02); }
+
 /* ── MODAL SHARE ROW ── */
 .modal-share-row {
   display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
