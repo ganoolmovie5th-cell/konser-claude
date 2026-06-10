@@ -1263,14 +1263,21 @@ openModal = function(id) {
     ConcertReviews.bind(id);
   }
 
-  // 5. Inject social features, price history, social links, discussion, UGC
-  const disclaimer = mc.querySelector('.modal-disclaimer');
-  if (disclaimer) {
-    // Social features (Going/Interested)
+  // 5. Inject social features before disclaimer
+  const disclaimer2 = mc.querySelector('.modal-disclaimer');
+  if (disclaimer2 && typeof SocialFeatures !== 'undefined') {
     const socialEl = document.createElement('div');
     socialEl.innerHTML = SocialFeatures.renderBadges(c.id);
-    disclaimer.insertAdjacentElement('beforebegin', socialEl.firstElementChild || socialEl);
+    disclaimer2.insertAdjacentElement('beforebegin', socialEl.firstElementChild || socialEl);
   }
+
+  // 6. Track click
+  try {
+    const cl = JSON.parse(localStorage.getItem('cid_clicks') || '{}');
+    cl[id] = (cl[id] || 0) + 1;
+    localStorage.setItem('cid_clicks', JSON.stringify(cl));
+  } catch {}
+};
 
 // Clean up URL when modal closes
 const _origCloseModal = closeModal;

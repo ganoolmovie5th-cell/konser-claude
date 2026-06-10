@@ -714,42 +714,18 @@ window.UGC = UGC;
    ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Patch openModal
-  const _baseOpenModal = window.openModal;
-  if (typeof _baseOpenModal === 'function') {
+  // Patch openModal dari features.js — inject Price History, Social Links, Discussion, UGC
+  const _baseFeaturesOpenModal = window.openModal;
+  if (typeof _baseFeaturesOpenModal === 'function') {
     window.openModal = function(id) {
-      _baseOpenModal(id);
-      const c = typeof CONCERTS !== 'undefined' ? CONCERTS.find(x => x.id === id) : null;
+      _baseFeaturesOpenModal(id);
+      const c  = typeof CONCERTS !== 'undefined' ? CONCERTS.find(x => x.id === id) : null;
       if (!c) return;
       const mc = document.getElementById('modalContent');
       if (!mc) return;
 
-      // Seed price history for this concert
+      // Seed & inject price history
       PriceTracker.seedHistory(c);
-
-      // ── Google Calendar button ──
-      const gcUrl = getGoogleCalendarUrl(c);
-      const modalActions = mc.querySelector('.modal-actions');
-      if (modalActions && gcUrl) {
-        const gcBtn = document.createElement('a');
-        gcBtn.className = 'btn btn-secondary';
-        gcBtn.href = gcUrl;
-        gcBtn.target = '_blank';
-        gcBtn.rel = 'noopener';
-        gcBtn.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;';
-        gcBtn.innerHTML = `<svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Google Calendar`;
-        modalActions.appendChild(gcBtn);
-      }
-
-      // ── Social features (Going / Interested) ──
-      const disclaimer = mc.querySelector('.modal-disclaimer');
-      if (disclaimer) {
-        const socialEl = document.createElement('div');
-        socialEl.innerHTML = SocialFeatures.renderBadges(c.id);
-        disclaimer.insertAdjacentElement('beforebegin', socialEl.firstElementChild || socialEl);
-      }
-
-      // ── Price history mini chart ──
       const priceHistory = PriceTracker.renderMiniChart(c.id);
       if (priceHistory) {
         const ticketArea = mc.querySelector('.modal-ticket-area');
@@ -760,9 +736,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // ── Ticket aggregator — dihapus ──
-
-      // ── Social media links ──
+      // Social media links
       const smHtml = SocialMedia.renderLinks(c.id, c.artist);
       if (smHtml) {
         const sources = mc.querySelector('.modal-sources');
@@ -773,7 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // ── Discussion ──
+      // Discussion
       const sources = mc.querySelector('.modal-sources');
       if (sources) {
         const discEl = document.createElement('div');
@@ -781,8 +755,8 @@ document.addEventListener('DOMContentLoaded', () => {
         sources.insertAdjacentElement('afterend', discEl.firstElementChild || discEl);
       }
 
-      // ── UGC photos ──
-      const discSection = mc.querySelector(`.disc-section`);
+      // UGC photos
+      const discSection = mc.querySelector('.disc-section');
       if (discSection) {
         const ugcEl = document.createElement('div');
         ugcEl.innerHTML = UGC.render(c.id);
