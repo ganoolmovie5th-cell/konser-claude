@@ -71,15 +71,84 @@ Buka browser dan akses `http://localhost:8080`.
 
 ---
 
-## 🤖 Auto-Scraper (GitHub Actions)
+## 📧 Setup Gmail App Password (Wajib untuk Email Laporan)
+
+Scraper mengirim laporan harian ke **listconcerttour@gmail.com** via Gmail SMTP.
+Agar bisa kirim email dari GitHub Actions, kamu perlu buat **App Password** di Google:
+
+### Langkah-langkah:
+
+**1. Aktifkan 2-Step Verification**
+- Buka [myaccount.google.com/security](https://myaccount.google.com/security)
+- Pastikan **2-Step Verification** sudah ON
+
+**2. Buat App Password**
+- Buka [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+- Login dengan akun `listconcerttour@gmail.com`
+- Klik **"Create"** → pilih nama: `ConcertID Scraper`
+- Google akan generate password **16 karakter** (contoh: `abcd efgh ijkl mnop`)
+- **Salin password tersebut** (hanya tampil sekali)
+
+**3. Tambahkan ke GitHub Secrets**
+- Buka repo di GitHub → **Settings → Secrets and variables → Actions**
+- Klik **"New repository secret"**
+- Name: `GMAIL_APP_PASSWORD`
+- Value: paste 16-karakter App Password (tanpa spasi)
+- Klik **"Add secret"**
+
+**4. Test kirim email**
+- Buka tab **Actions** di GitHub
+- Pilih workflow **"🎵 Daily Concert Monitor"**
+- Klik **"Run workflow"** → `dry_run: false` → **Run**
+- Cek inbox `listconcerttour@gmail.com`
+
+> ⚠️ **Jangan pernah** hardcode App Password langsung di kode. Selalu pakai GitHub Secrets.
+
+---
+
+## 🤖 Auto-Scraper — Monitoring Only (GitHub Actions)
 
 Scraper berjalan otomatis setiap hari pukul **01:00 WIB** (18:00 UTC) via GitHub Actions.
 
-### Cara Kerja
-1. Script `scraper.py` dijalankan oleh workflow `.github/workflows/scrape.yml`
-2. Scraper mengumpulkan data dari sumber seperti Bandwagon Asia, Tempo.co, The Jakarta Post, tiket.com, Loket.com, Jambase, dan Songkick
-3. Jika ada perubahan data, `app.js` diperbarui dan di-commit otomatis ke branch `main`
-4. Commit dilakukan oleh **ConcertID Bot** dengan pesan format: `🎵 auto-update: concert data refreshed — DD MMM YYYY HH:MM WIB`
+### ⚠️ Cara Kerja (Opsi A — Review Manual)
+
+```
+Scraper jalan tiap hari
+       ↓
+Scrape 7 sumber terpercaya
+       ↓
+Generate laporan HTML + JSON
+       ↓
+Kirim ke listconcerttour@gmail.com
+       ↓
+Kamu review isi laporan
+       ↓
+Kalau ada info valid → update manual di app.js → merge ke main
+```
+
+> **TIDAK ada auto-push ke repo.** `app.js` hanya diubah secara manual setelah kamu review.
+> Ini mencegah data konser yang salah/belum terverifikasi masuk ke website.
+
+### Sumber yang Di-scrape
+
+| Sumber | Trust | Keterangan |
+|---|---|---|
+| Bandwagon Asia | HIGH | Portal musik Asia Tenggara terpercaya |
+| Tempo.co | HIGH | Media Indonesia terpercaya |
+| The Jakarta Post | HIGH | Berita Indonesia berbahasa Inggris |
+| Songkick | HIGH | Database konser global |
+| tiket.com | HIGH | Platform tiket resmi Indonesia |
+| Loket.com | HIGH | Platform tiket resmi Indonesia |
+| JamBase | MEDIUM | Database konser global |
+
+### File yang Dihasilkan
+
+| File | Keterangan |
+|---|---|
+| `scraper_report.json` | Data mentah hasil scraping (machine-readable) |
+| `scraper_report.html` | Laporan visual yang dikirim via email |
+
+> File report **tidak di-commit ke repo** — hanya tersedia sebagai GitHub Actions artifact (30 hari).
 
 ### Jalankan Scraper Secara Manual
 
@@ -87,11 +156,14 @@ Scraper berjalan otomatis setiap hari pukul **01:00 WIB** (18:00 UTC) via GitHub
 # Install dependensi Python
 pip install -r requirements.txt
 
-# Jalankan scraper
+# Jalankan scraper (generate report saja, tidak kirim email)
 python scraper.py
+
+# Kirim email laporan (butuh GMAIL_APP_PASSWORD di environment)
+GMAIL_APP_PASSWORD="xxxx xxxx xxxx xxxx" python email_reporter.py
 ```
 
-Bisa juga trigger manual dari tab **Actions** di GitHub.
+Bisa juga trigger manual dari tab **Actions** di GitHub → pilih **"🎵 Daily Concert Monitor"** → **Run workflow**.
 
 ---
 
