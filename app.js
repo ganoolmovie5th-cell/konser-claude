@@ -999,44 +999,6 @@ function updateWishlistCount() {
   badge.style.display = count > 0 ? 'inline-flex' : 'none';
 }
 
-/* ============================================
-   FITUR 4 — ADD TO CALENDAR (.ics)
-   ============================================ */
-function downloadICS(c) {
-  if (isRumor(c)) { showToast('⚠️ Tanggal belum pasti, tidak bisa dibuat kalender', 'error'); return; }
-  const dateStr  = c.rawDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-  // End = start + 3 hours
-  const endDate  = new Date(c.rawDate.getTime() + 3 * 3600000);
-  const endStr   = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-  const loc      = `${c.venue}, ${c.city}`;
-  const desc     = `${c.tour}\\nHarga: ${c.priceRange}\\nTiket: ${c.ticketUrl}\\n\\nData dari ConcertID — www.list-concert-tour.web.id`;
-  const uid      = `${c.id}@list-concert-tour.web.id`;
-  const ics = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//ConcertID//list-concert-tour.web.id//ID',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    'BEGIN:VEVENT',
-    `UID:${uid}`,
-    `DTSTART:${dateStr}`,
-    `DTEND:${endStr}`,
-    `SUMMARY:🎵 ${c.artist} Live in Jakarta`,
-    `LOCATION:${loc}`,
-    `DESCRIPTION:${desc}`,
-    `URL:${window.location.origin}?concert=${c.id}`,
-    'END:VEVENT',
-    'END:VCALENDAR'
-  ].join('\r\n');
-
-  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-  const link = document.createElement('a');
-  link.href  = URL.createObjectURL(blob);
-  link.download = `${c.id}.ics`;
-  link.click();
-  URL.revokeObjectURL(link.href);
-  showToast('📅 File kalender berhasil diunduh!', 'success');
-}
 
 /* ============================================
    FITUR 5 — SHARE PANEL (WA / IG / TG / Copy)
@@ -1219,10 +1181,7 @@ renderCards = function(list) {
           onclick="event.stopPropagation();toggleWishlist('${c.id}')">
           ${wishlisted ? '❤️' : '🤍'} ${wishlisted ? 'Wishlisted' : 'Wishlist'}
         </button>
-        ${!isPast(c) && !isRumor(c) ? `
-        <button class="btn-action" onclick="event.stopPropagation();downloadICS(CONCERTS.find(x=>x.id==='${c.id}'))">
-          📅 Kalender
-        </button>` : ''}
+
         <button class="btn-action" onclick="event.stopPropagation();openSharePanel('${c.id}')">
           🔗 Share
         </button>`;
