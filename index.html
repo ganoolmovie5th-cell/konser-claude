@@ -273,7 +273,7 @@
     </div>
   </section>
 
-  <!-- NEWSLETTER -->
+  <!-- NEWSLETTER — Mailchimp -->
   <section class="newsletter-section">
     <div class="container">
       <div class="nl-card">
@@ -282,17 +282,48 @@
           <h3>Jangan Ketinggalan Konser!</h3>
           <p>Daftar gratis dan dapatkan update konser terbaru langsung di inbox kamu.</p>
         </div>
-        <div class="nl-action" id="newsletterFormContainer">
-          <!-- diisi oleh Newsletter.render() -->
-          <form class="nl-form" id="nlForm" onsubmit="Newsletter.handleSubmit(event)">
-            <input class="nl-input" type="email" id="nlEmail" placeholder="email@kamu.com" required />
-            <button class="nl-btn" type="submit">Daftar Gratis</button>
+        <div class="nl-action">
+          <!-- Mailchimp embedded form — honeypot & hidden fields wajib dipertahankan -->
+          <form
+            action="https://web.us20.list-manage.com/subscribe/post?u=c54d42e4d9f0220482da0d71a&amp;id=a43a7b95e1&amp;f_id=00d1caf1f0"
+            method="post"
+            id="mc-embedded-subscribe-form"
+            name="mc-embedded-subscribe-form"
+            target="_blank"
+            class="nl-form nl-mc-form"
+            onsubmit="handleMcSubmit(event)"
+          >
+            <input class="nl-input" type="email" name="EMAIL" id="mce-EMAIL"
+              placeholder="email@kamu.com" required autocomplete="email" />
+            <!-- Honeypot anti-bot — JANGAN dihapus -->
+            <div aria-hidden="true" style="position:absolute;left:-5000px">
+              <input type="text" name="b_c54d42e4d9f0220482da0d71a_a43a7b95e1" tabindex="-1" value="" />
+            </div>
+            <button class="nl-btn" type="submit" id="mc-subscribe-btn">Daftar Gratis</button>
           </form>
-          <div class="nl-msg" id="nlMsg"></div>
+          <div class="nl-msg" id="nlMcMsg"></div>
         </div>
       </div>
     </div>
   </section>
+
+  <script>
+    function handleMcSubmit(e) {
+      const btn = document.getElementById('mc-subscribe-btn');
+      const msg = document.getElementById('nlMcMsg');
+      if (btn) { btn.disabled = true; btn.textContent = 'Mendaftar...'; }
+      if (msg) { msg.textContent = ''; }
+      // Biarkan form submit normal ke Mailchimp (target="_blank")
+      // Tampilkan pesan sukses setelah 800ms (form sudah tersubmit ke tab baru)
+      setTimeout(() => {
+        if (btn) { btn.textContent = '✅ Berhasil!'; }
+        if (msg) {
+          msg.textContent = '🎉 Cek inbox kamu untuk konfirmasi dari Mailchimp.';
+          msg.style.color = '#4ade80';
+        }
+      }, 800);
+    }
+  </script>
 
   <!-- FOOTER -->
   <footer class="footer">
