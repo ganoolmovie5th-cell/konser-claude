@@ -636,9 +636,9 @@ const UGC = (() => {
               <img class="ugc-preview-img" id="ugcpreviewimg_${concertId}" alt="preview" />
               <div class="ugc-preview-fields">
                 <input class="ugc-caption-input" id="ugccaption_${concertId}" type="text"
-                  placeholder="Caption (opsional)" maxlength="100" />
+                  placeholder="Caption foto * (wajib diisi)" maxlength="100" required />
                 <input class="ugc-author-input" id="ugcauthor_${concertId}" type="text"
-                  placeholder="Nama kamu (opsional)" maxlength="30" />
+                  placeholder="Nama kamu * (wajib diisi)" maxlength="30" required />
                 <div class="ugc-preview-actions">
                   <button class="ugc-cancel" onclick="UGC.cancelPreview('${concertId}')">Batal</button>
                   <button class="ugc-submit" onclick="UGC.confirmUpload('${concertId}')">Upload Foto</button>
@@ -684,9 +684,12 @@ const UGC = (() => {
   async function confirmUpload(concertId) {
     const fileInput = document.getElementById(`ugcfile_${concertId}`);
     const file      = fileInput?.files?.[0];
-    const caption   = document.getElementById(`ugccaption_${concertId}`)?.value || '';
-    const author    = document.getElementById(`ugcauthor_${concertId}`)?.value  || '';
-    if (!file) { showToast('⚠️ Pilih foto terlebih dahulu.', 'error'); return; }
+    const caption   = document.getElementById(`ugccaption_${concertId}`)?.value?.trim() || '';
+    const author    = document.getElementById(`ugcauthor_${concertId}`)?.value?.trim()  || '';
+
+    if (!file)    { showToast('⚠️ Pilih foto terlebih dahulu.', 'error'); return; }
+    if (!caption) { showToast('⚠️ Caption wajib diisi.', 'error'); return; }
+    if (!author)  { showToast('⚠️ Nama wajib diisi.', 'error'); return; }
 
     const btn = document.querySelector(`#ugc_${concertId} .ugc-submit`);
     if (btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }

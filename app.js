@@ -1233,7 +1233,7 @@ openModal = function(id) {
     modalDetails.insertAdjacentElement('afterend', mapEl);
   }
 
-  // 2. Inject share + calendar row before modal-actions
+  // 2. Inject share row before modal-actions
   const modalActions = mc.querySelector('.modal-actions');
   if (modalActions) {
     const shareRow = document.createElement('div');
@@ -1243,10 +1243,6 @@ openModal = function(id) {
         onclick="toggleWishlist('${c.id}');this.classList.toggle('wishlisted');this.innerHTML=isWishlisted('${c.id}')?'❤️ Wishlisted':'🤍 Wishlist'">
         ${isWishlisted(c.id) ? '❤️ Wishlisted' : '🤍 Wishlist'}
       </button>
-      ${!isPast(c) && !isRumor(c) ? `
-      <button class="btn-action" onclick="downloadICS(CONCERTS.find(x=>x.id==='${c.id}'))">
-        📅 Add to Calendar
-      </button>` : ''}
       <button class="btn-action" onclick="openSharePanel('${c.id}')">
         🔗 Share
       </button>`;
