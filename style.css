@@ -537,3 +537,208 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
    ============================================ */
 .nav-link-analytics { color: #c084fc !important; font-weight: 600 !important; }
 .nav-link-analytics:hover { color: #a855f7 !important; }
+
+
+
+/* ============================================
+   LIGHT MODE — CSS Variables Override
+   ============================================ */
+:root {
+  --transition-theme: background 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* Smooth transition semua elemen saat ganti tema */
+*, *::before, *::after {
+  transition: var(--transition-theme);
+}
+
+/* Override: light mode diaktifkan via class di <html> */
+html.light {
+  --bg:            #f8f8fb;
+  --bg2:           #f0f0f5;
+  --bg3:           #ffffff;
+  --border:        rgba(0,0,0,0.08);
+  --border-hover:  rgba(0,0,0,0.18);
+  --text:          #111114;
+  --text-muted:    #6b7280;
+  --text-sub:      #4b5563;
+  --shadow:        0 8px 32px rgba(0,0,0,0.10);
+}
+
+/* Navbar light */
+html.light .navbar {
+  background: rgba(248,248,251,0.85);
+}
+html.light .navbar.scrolled {
+  background: rgba(248,248,251,0.98);
+}
+
+/* Hero orb — lebih soft di light mode */
+html.light .hero-orb {
+  opacity: 0.18;
+}
+html.light .hero-grid {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+}
+
+/* Search bar */
+html.light .search-wrap {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.1);
+}
+html.light .search-wrap:focus-within {
+  background: rgba(168,85,247,0.06);
+  border-color: rgba(168,85,247,0.4);
+}
+html.light .search-wrap input { color: var(--text); }
+html.light .search-wrap input::placeholder { color: var(--text-muted); }
+
+/* Filter bar */
+html.light .filter-section { background: var(--bg); }
+html.light .filter-btn { color: var(--text-sub); }
+html.light .filter-btn:hover { color: var(--text); }
+
+/* Concert cards */
+html.light .concert-card { background: var(--bg3); }
+html.light .card-header  { background: var(--bg2); }
+html.light .card-overlay {
+  background: linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.1) 50%, var(--bg3) 100%);
+}
+html.light .card-header.has-photo .card-overlay {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 40%, var(--bg3) 100%);
+}
+
+/* Card price box */
+html.light .card-price {
+  background: rgba(168,85,247,0.06);
+  border-color: rgba(168,85,247,0.15);
+}
+html.light .card-price-rumor {
+  background: rgba(245,158,11,0.07) !important;
+  border-color: rgba(245,158,11,0.18) !important;
+}
+
+/* Btn secondary */
+html.light .btn-secondary {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.1);
+  color: var(--text-sub);
+}
+html.light .btn-secondary:hover {
+  background: rgba(0,0,0,0.09);
+  color: var(--text);
+}
+
+/* Btn action */
+html.light .btn-action {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.1);
+}
+html.light .btn-action:hover {
+  background: rgba(0,0,0,0.09);
+  color: var(--text);
+}
+
+/* Highlight section */
+html.light .highlight-section { background: var(--bg2); }
+html.light .highlight-card    { background: var(--bg3); }
+
+/* Legend */
+html.light .legend-box { background: var(--bg3); }
+
+/* Venue cards */
+html.light .venue-card { background: var(--bg3); }
+
+/* About section */
+html.light .about-section { background: var(--bg2); }
+html.light .about-card    { background: var(--bg3); }
+
+/* Source tags */
+html.light .source-tags span {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.08);
+}
+
+/* Modal */
+html.light .modal-overlay { background: rgba(0,0,0,0.5); }
+html.light .modal          { background: var(--bg3); }
+html.light .modal-close {
+  background: rgba(0,0,0,0.07);
+  color: var(--text-sub);
+}
+html.light .modal-close:hover {
+  background: rgba(0,0,0,0.13);
+  color: var(--text);
+}
+html.light .detail-box { background: rgba(0,0,0,0.03); }
+html.light .ticket-cat { background: rgba(0,0,0,0.03); }
+html.light .rumor-detail-box {
+  background: rgba(245,158,11,0.07);
+  border-color: rgba(245,158,11,0.2);
+}
+html.light .modal-disclaimer {
+  background: rgba(234,179,8,0.07);
+  border-color: rgba(234,179,8,0.18);
+}
+
+/* Share panel */
+html.light .share-panel { background: var(--bg3); }
+html.light .share-panel-backdrop { background: rgba(0,0,0,0.35); }
+html.light .share-btn {
+  background: rgba(0,0,0,0.03);
+  color: var(--text);
+}
+html.light .share-btn:hover { background: rgba(0,0,0,0.08); }
+
+/* Toast */
+html.light .toast {
+  background: var(--bg3);
+  color: var(--text);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+
+/* Countdown boxes */
+html.light .cd-box {
+  background: rgba(168,85,247,0.08);
+  border-color: rgba(168,85,247,0.2);
+}
+
+/* Price bars */
+html.light .price-bar-track { background: rgba(0,0,0,0.07); }
+
+/* Footer */
+html.light .footer { background: var(--bg); }
+
+/* ── THEME TOGGLE BUTTON ── */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  font-size: 1.05rem;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.theme-toggle:hover {
+  background: rgba(168,85,247,0.15);
+  border-color: rgba(168,85,247,0.4);
+  transform: rotate(20deg) scale(1.08);
+}
+html.light .theme-toggle {
+  background: rgba(0,0,0,0.05);
+}
+html.light .theme-toggle:hover {
+  background: rgba(168,85,247,0.12);
+}
+.theme-toggle-icon {
+  pointer-events: none;
+  display: block;
+}

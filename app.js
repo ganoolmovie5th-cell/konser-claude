@@ -1352,3 +1352,71 @@ document.addEventListener('DOMContentLoaded', () => {
   // Apply UTM after first render
   setTimeout(applyUTMToLinks, 300);
 });
+
+
+
+/* ============================================
+   FITUR — LIGHT / DARK MODE TOGGLE
+   Preferensi disimpan di localStorage.
+   Default: dark mode.
+   Key: 'concertid_theme' → 'light' | 'dark'
+   ============================================ */
+(function initTheme() {
+  const STORAGE_KEY = 'concertid_theme';
+  const html        = document.documentElement;
+  const btn         = document.getElementById('themeToggle');
+  const icon        = document.getElementById('themeIcon');
+
+  /* Tentukan tema awal:
+     1. Pakai preferensi tersimpan jika ada
+     2. Fallback ke sistem OS (prefers-color-scheme)
+     3. Default: dark */
+  function getSavedTheme() {
+    try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+  }
+  function getSystemTheme() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+      ? 'light' : 'dark';
+  }
+
+  let currentTheme = getSavedTheme() || getSystemTheme();
+
+  function applyTheme(theme) {
+    if (theme === 'light') {
+      html.classList.add('light');
+      if (icon) icon.textContent = '☀️';
+      if (btn)  btn.setAttribute('title', 'Ganti ke Dark Mode');
+    } else {
+      html.classList.remove('light');
+      if (icon) icon.textContent = '🌙';
+      if (btn)  btn.setAttribute('title', 'Ganti ke Light Mode');
+    }
+    currentTheme = theme;
+  }
+
+  function toggleTheme() {
+    const next = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem(STORAGE_KEY, next); } catch {}
+    showToast(
+      next === 'light' ? '☀️ Light mode aktif' : '🌙 Dark mode aktif',
+      'info',
+      2000
+    );
+  }
+
+  /* Terapkan tema sebelum render agar tidak flash */
+  applyTheme(currentTheme);
+
+  /* Pasang event listener tombol */
+  if (btn) btn.addEventListener('click', toggleTheme);
+
+  /* Ikuti perubahan preferensi sistem secara real-time
+     (hanya berlaku jika user belum pernah set manual) */
+  try {
+    window.matchMedia('(prefers-color-scheme: light)')
+      .addEventListener('change', e => {
+        if (!getSavedTheme()) applyTheme(e.matches ? 'light' : 'dark');
+      });
+  } catch {}
+})();
