@@ -1039,7 +1039,7 @@ function downloadICS(c) {
 }
 
 /* ============================================
-   FITUR 5 — SHARE PANEL (WA / Twitter / Copy)
+   FITUR 5 — SHARE PANEL (WA / IG / TG / Copy)
    ============================================ */
 let _shareTarget = null;
 
@@ -1051,9 +1051,26 @@ function openSharePanel(id) {
   const text = `🎵 ${c.artist} — ${c.dates[0]} di ${c.venue.split('(')[0].trim()}, Jakarta!\nCek info lengkap & harga tiket di ConcertID 👇\n${url}`;
 
   document.getElementById('sharePanelSubtitle').textContent = `${c.artist} · ${c.dates[0]}`;
-  document.getElementById('shareWa').href  = `https://wa.me/?text=${encodeURIComponent(text)}`;
-  document.getElementById('shareTw').href  = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
 
+  // WhatsApp
+  document.getElementById('shareWa').href = `https://wa.me/?text=${encodeURIComponent(text)}`;
+
+  // Instagram — copy caption ke clipboard lalu buka Instagram
+  document.getElementById('shareIg').onclick = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('📋 Caption disalin! Buka Instagram dan paste di caption Story/Post kamu.', 'info', 4000);
+      setTimeout(() => window.open('https://www.instagram.com/', '_blank'), 800);
+    }).catch(() => {
+      showToast('Buka Instagram dan bagikan secara manual.', 'info', 3000);
+      setTimeout(() => window.open('https://www.instagram.com/', '_blank'), 600);
+    });
+    closeSharePanel();
+  };
+
+  // Telegram
+  document.getElementById('shareTg').href = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`🎵 ${c.artist} — ${c.dates[0]} di ${c.venue.split('(')[0].trim()}\nCek info & harga tiket di ConcertID:`)}`;
+
+  // Copy Link
   document.getElementById('shareCopy').onclick = () => {
     navigator.clipboard.writeText(url).then(() => {
       showToast('🔗 Link berhasil disalin!', 'success');

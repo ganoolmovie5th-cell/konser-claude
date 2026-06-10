@@ -301,19 +301,41 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .share-panel-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 99px; margin: 0 auto 20px; }
 .share-panel-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; text-align: center; margin-bottom: 20px; }
 .share-panel-subtitle { font-size: 0.82rem; color: var(--text-muted); text-align: center; margin-bottom: 20px; margin-top: -14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.share-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-.share-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; border-radius: var(--radius); border: 1px solid var(--border); background: rgba(255,255,255,0.04); cursor: pointer; transition: all 0.2s; color: var(--text); text-decoration: none; font-family: var(--font); }
-.share-btn:hover { transform: translateY(-2px); border-color: var(--border-hover); background: rgba(255,255,255,0.08); }
-.share-btn-icon { font-size: 1.8rem; line-height: 1; }
-.share-btn-label { font-size: 0.75rem; font-weight: 600; color: var(--text-sub); }
-.share-btn-wa { border-color: rgba(37,211,102,0.3); }
-.share-btn-wa:hover { background: rgba(37,211,102,0.1); border-color: rgba(37,211,102,0.5); }
-.share-btn-tw { border-color: rgba(29,161,242,0.3); }
-.share-btn-tw:hover { background: rgba(29,161,242,0.1); border-color: rgba(29,161,242,0.5); }
-.share-btn-copy { border-color: rgba(168,85,247,0.3); }
+.share-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.share-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 10px; border-radius: var(--radius); border: 1px solid var(--border); background: rgba(255,255,255,0.04); cursor: pointer; transition: all 0.2s; color: var(--text); text-decoration: none; font-family: var(--font); }
+.share-btn:hover { transform: translateY(-3px); border-color: var(--border-hover); background: rgba(255,255,255,0.08); }
+.share-btn-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+.share-btn-icon svg { width: 28px; height: 28px; }
+.share-btn-label { font-size: 0.72rem; font-weight: 600; color: var(--text-sub); }
+
+/* WhatsApp — hijau */
+.share-btn-wa { border-color: rgba(37,211,102,0.3); color: #25d366; }
+.share-btn-wa:hover { background: rgba(37,211,102,0.1); border-color: rgba(37,211,102,0.55); }
+.share-btn-wa .share-btn-label { color: #25d366; }
+
+/* Instagram — gradient merah-ungu */
+.share-btn-ig { border-color: rgba(225,48,108,0.3); color: #e1306c; }
+.share-btn-ig:hover { background: rgba(225,48,108,0.1); border-color: rgba(225,48,108,0.5); }
+.share-btn-ig .share-btn-label { color: #e1306c; }
+.share-btn-ig .share-btn-icon svg { fill: url(#ig-grad); }
+
+/* Telegram — biru */
+.share-btn-tg { border-color: rgba(38,161,220,0.3); color: #26a1dc; }
+.share-btn-tg:hover { background: rgba(38,161,220,0.1); border-color: rgba(38,161,220,0.5); }
+.share-btn-tg .share-btn-label { color: #26a1dc; }
+
+/* Copy link — ungu */
+.share-btn-copy { border-color: rgba(168,85,247,0.3); color: #a855f7; }
 .share-btn-copy:hover { background: rgba(168,85,247,0.1); border-color: rgba(168,85,247,0.5); }
+.share-btn-copy .share-btn-label { color: #a855f7; }
+.share-btn-copy .share-btn-icon svg { stroke: #a855f7; }
+
 .share-panel-close { width: 100%; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: var(--font); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
 .share-panel-close:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+@media (max-width: 400px) {
+  .share-btns { grid-template-columns: repeat(2, 1fr); }
+}
 
 /* ── 6. TOAST NOTIFICATION ── */
 .toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
