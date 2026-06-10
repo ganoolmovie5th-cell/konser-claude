@@ -25,8 +25,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .nav-links a { color: var(--text-sub); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
 .nav-links a:hover { color: var(--text); }
 .nav-cta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.badge-live { font-size: 0.75rem; font-weight: 600; padding: 6px 12px; background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.25); border-radius: 99px; white-space: nowrap; }
-@media (max-width: 640px) { .badge-live { display: none; } }
+/* Badge auto-update disembunyikan dari UI, scraper tetap jalan via GitHub Actions */
+.badge-live { display: none; }
 
 /* HERO */
 .hero { position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px 0 80px; overflow: hidden; }
