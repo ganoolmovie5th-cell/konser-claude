@@ -394,6 +394,13 @@ const SocialMedia = (() => {
     'ed-sheeran-jakarta-rumor':     { ig: 'teddysphotos',        tw: 'edsheeran' },
     'dua-lipa-jakarta-rumor':       { ig: 'dualipa',             tw: 'DUALIPA' },
     'aespa-jakarta-rumor':          { ig: 'aespa_official',      tw: 'aespa_SM' },
+    'westlife-jakarta-2027':        { ig: 'westlifeofficial',    tw: 'westlife' },
+    'jaehyun-jakarta-2026':         { ig: 'jaehyun_studios',     tw: 'NCTsmtown_JAEHYUN' },
+    'ariana-grande-jakarta-rumor':  { ig: 'arianagrande',        tw: 'ArianaGrande' },
+    'olivia-rodrigo-jakarta-rumor': { ig: 'oliviarodrigo',       tw: 'oliviarodrigo' },
+    'charlie-puth-jakarta-rumor':   { ig: 'charlieputh',         tw: 'charlieputh' },
+    'post-malone-jakarta-rumor':    { ig: 'postmalone',          tw: 'PostMalone' },
+    'bad-bunny-jakarta-rumor':      { ig: 'badbunnypr',          tw: 'sanbenito' },
   };
 
   function getSocials(concertId) { return ARTIST_SOCIALS[concertId] || null; }
