@@ -728,7 +728,7 @@ function renderCards(list) {
                 ? `<button class="btn btn-rumor-disabled" disabled>🔮 Belum Dikonfirmasi</button>`
                 : `<button class="btn btn-disabled" disabled>Konser Selesai</button>`
             }
-            ${!rumor ? `<button class="btn btn-secondary" onclick="openModal('${c.id}');event.stopPropagation()">Detail ›</button>` : ''}
+            <button class="btn btn-secondary" onclick="openModal('${c.id}');event.stopPropagation()">Detail ›</button>
           </div>
         </div>
       </div>`;

@@ -635,9 +635,9 @@ const UGC = (() => {
             <div class="ugc-preview-wrap" id="ugcpreview_${concertId}" style="display:none">
               <img class="ugc-preview-img" id="ugcpreviewimg_${concertId}" alt="preview" />
               <div class="ugc-preview-fields">
-                <input class="ugc-caption" id="ugccaption_${concertId}" type="text"
+                <input class="ugc-caption-input" id="ugccaption_${concertId}" type="text"
                   placeholder="Caption (opsional)" maxlength="100" />
-                <input class="ugc-author" id="ugcauthor_${concertId}" type="text"
+                <input class="ugc-author-input" id="ugcauthor_${concertId}" type="text"
                   placeholder="Nama kamu (opsional)" maxlength="30" />
                 <div class="ugc-preview-actions">
                   <button class="ugc-cancel" onclick="UGC.cancelPreview('${concertId}')">Batal</button>
@@ -686,7 +686,6 @@ const UGC = (() => {
     const file      = fileInput?.files?.[0];
     const caption   = document.getElementById(`ugccaption_${concertId}`)?.value || '';
     const author    = document.getElementById(`ugcauthor_${concertId}`)?.value  || '';
-
     if (!file) { showToast('⚠️ Pilih foto terlebih dahulu.', 'error'); return; }
 
     const btn = document.querySelector(`#ugc_${concertId} .ugc-submit`);
@@ -728,6 +727,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Seed price history for this concert
       PriceTracker.seedHistory(c);
+
+      // ── Google Calendar button ──
+      const gcUrl = getGoogleCalendarUrl(c);
+      const modalActions = mc.querySelector('.modal-actions');
+      if (modalActions && gcUrl) {
+        const gcBtn = document.createElement('a');
+        gcBtn.className = 'btn btn-secondary';
+        gcBtn.href = gcUrl;
+        gcBtn.target = '_blank';
+        gcBtn.rel = 'noopener';
+        gcBtn.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;';
+        gcBtn.innerHTML = `<svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Google Calendar`;
+        modalActions.appendChild(gcBtn);
+      }
 
       // ── Social features (Going / Interested) ──
       const disclaimer = mc.querySelector('.modal-disclaimer');
