@@ -15,35 +15,42 @@ const TODAY = new Date(); // selalu tanggal hari ini
    gradient CSS (imageUrl: null)
    ============================================ */
 const ARTIST_IMAGES = {
+  // ── PAST ──
   'blackpink-deadline-2025':      'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/170514_BLACKPINK_at_YG_x_UNICEF_Walking_Festival_07.jpg/600px-170514_BLACKPINK_at_YG_x_UNICEF_Walking_Festival_07.jpg',
+  'green-day-jakarta-2025':       'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Green_Day_Live_in_Singapore_2010.jpg/600px-Green_Day_Live_in_Singapore_2010.jpg',
+  'ateez-2026':                   'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/ATEEZ_at_KCON_LA_2023_%28cropped%29.jpg/600px-ATEEZ_at_KCON_LA_2023_%28cropped%29.jpg',
+  'dream-theater-2026':           'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Dream_Theater_-_Wacken_Open_Air_2015_-_Wacken-7698.jpg/600px-Dream_Theater_-_Wacken_Open_Air_2015_-_Wacken-7698.jpg',
+  'mcr-hammersonic-2026':         'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/My_Chemical_Romance_lights.jpg/600px-My_Chemical_Romance_lights.jpg',
+  'laufey-jakarta-2026':          'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Laufey_in_2023.jpg/600px-Laufey_in_2023.jpg',
+  'exo-exhorizon-jakarta-2026':   'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/EXO-CBX_showcase_in_2016_%28cropped%29.jpg/600px-EXO-CBX_showcase_in_2016_%28cropped%29.jpg',
+  'fforever-jakarta-2026':        null,
+  // ── UPCOMING CONFIRMED ──
   'bts-jakarta-2026':             'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/WikiPortraits_Studio_BTS_at_Sundance_2024.jpg/600px-WikiPortraits_Studio_BTS_at_Sundance_2024.jpg',
   'avenged-sevenfold-jakarta-2026': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Avenged_Sevenfold_%2832468305786%29_%28cropped%29.jpg/600px-Avenged_Sevenfold_%2832468305786%29_%28cropped%29.jpg',
   'the-weeknd-jakarta-2026':      'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/The_Weeknd_Portrait_by_Brian_Ziff.jpg/600px-The_Weeknd_Portrait_by_Brian_Ziff.jpg',
-  'mcr-hammersonic-2026':         'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/My_Chemical_Romance_lights.jpg/600px-My_Chemical_Romance_lights.jpg',
   'mcr-jis-2026':                 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/My_Chemical_Romance_lights.jpg/600px-My_Chemical_Romance_lights.jpg',
-  'dream-theater-2026':           'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Dream_Theater_-_Wacken_Open_Air_2015_-_Wacken-7698.jpg/600px-Dream_Theater_-_Wacken_Open_Air_2015_-_Wacken-7698.jpg',
-  'laufey-jakarta-2026':          'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Laufey_in_2023.jpg/600px-Laufey_in_2023.jpg',
-  'green-day-jakarta-2025':       'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Green_Day_Live_in_Singapore_2010.jpg/600px-Green_Day_Live_in_Singapore_2010.jpg',
-  'ateez-2026':                   'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/ATEEZ_at_KCON_LA_2023_%28cropped%29.jpg/600px-ATEEZ_at_KCON_LA_2023_%28cropped%29.jpg',
   'the-neighbourhood-jakarta-2026': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/The_Neighbourhood_-_03-28-2014_%2813623028734%29.jpg/600px-The_Neighbourhood_-_03-28-2014_%2813623028734%29.jpg',
-  'bryan-adams-jakarta-2026':     'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Bryan_Adams_in_2019.jpg/600px-Bryan_Adams_in_2019.jpg',
+  'lalala-fest-2026':             'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Steve_Lacy_Primavera_Sound_2023_%28cropped%29.jpg/600px-Steve_Lacy_Primavera_Sound_2023_%28cropped%29.jpg',
   'five-sos-jakarta-2026':        'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/5_Seconds_of_Summer_at_the_iHeartRadio_Music_Festival_%28cropped%29.jpg/600px-5_Seconds_of_Summer_at_the_iHeartRadio_Music_Festival_%28cropped%29.jpg',
+  'java-jazz-2026':               'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Jon_Batiste_%2852944193773%29_%28cropped%29.jpg/600px-Jon_Batiste_%2852944193773%29_%28cropped%29.jpg',
+  'bryan-adams-jakarta-2026':     'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Bryan_Adams_in_2019.jpg/600px-Bryan_Adams_in_2019.jpg',
   'westlife-jakarta-2027':        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Westlife_in_2019.jpg/600px-Westlife_in_2019.jpg',
-  'perses-jakarta-2026':          null,
   'jaehyun-jakarta-2026':         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Jaehyun_at_the_2022_Golden_Disc_Awards.jpg/600px-Jaehyun_at_the_2022_Golden_Disc_Awards.jpg',
+  // ── NEW CONCERTS ──
+  'aespa-jakarta-2026':           'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Aespa_at_SMTOWN_LIVE_2022_%28cropped%29.jpg/600px-Aespa_at_SMTOWN_LIVE_2022_%28cropped%29.jpg',
+  'nct-wish-jakarta-2026':        null,
+  'deep-purple-jakarta-2026':     'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Deep_Purple_-_Live_in_Concert_2012_%28cropped%29.jpg/600px-Deep_Purple_-_Live_in_Concert_2012_%28cropped%29.jpg',
+  'monsta-x-jakarta-2026':        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/MONSTA_X_at_KCON_2019_LA_%28cropped%29.jpg/600px-MONSTA_X_at_KCON_2019_LA_%28cropped%29.jpg',
+  'treasure-jakarta-2026':        null,
+  'hammersonic-2026':             'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/My_Chemical_Romance_lights.jpg/600px-My_Chemical_Romance_lights.jpg',
+  'one-ok-rock-jakarta-2026':     'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/One_Ok_Rock_NRJ_Music_Tour.jpg/600px-One_Ok_Rock_NRJ_Music_Tour.jpg',
+  'perses-jakarta-2026':          null,
+  // ── RUMOR ──
   'ariana-grande-jakarta-rumor':  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Ariana_Grande_2019_by_Glenn_Francis.jpg/600px-Ariana_Grande_2019_by_Glenn_Francis.jpg',
   'olivia-rodrigo-jakarta-rumor': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Olivia_Rodrigo_at_the_2021_AMAs_%28cropped%29.jpg/600px-Olivia_Rodrigo_at_the_2021_AMAs_%28cropped%29.jpg',
   'charlie-puth-jakarta-rumor':   'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Charlie_Puth_2022_%28cropped%29.jpg/600px-Charlie_Puth_2022_%28cropped%29.jpg',
   'post-malone-jakarta-rumor':    'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Post_Malone_2019_%28cropped%29.jpg/600px-Post_Malone_2019_%28cropped%29.jpg',
   'bad-bunny-jakarta-rumor':      'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Bad_Bunny_2020_%28cropped%29.jpg/600px-Bad_Bunny_2020_%28cropped%29.jpg',
-  'lalala-fest-2026':             'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Steve_Lacy_Primavera_Sound_2023_%28cropped%29.jpg/600px-Steve_Lacy_Primavera_Sound_2023_%28cropped%29.jpg',
-  'aespa-jakarta-2026':           'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Aespa_at_2023_MAMA_Awards_%28cropped%29.jpg/600px-Aespa_at_2023_MAMA_Awards_%28cropped%29.jpg',
-  'nct-wish-jakarta-2026':        null,
-  'deep-purple-jakarta-2026':     'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Deep_Purple_%28band%29.jpg/600px-Deep_Purple_%28band%29.jpg',
-  'monsta-x-jakarta-2026':        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/MONSTA_X_at_KCON_2019_LA_%28cropped%29.jpg/600px-MONSTA_X_at_KCON_2019_LA_%28cropped%29.jpg',
-  'treasure-jakarta-2026':        null,
-  'hammersonic-2026':             null,
-  'one-ok-rock-jakarta-2026':     'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/One_Ok_Rock_NRJ_Music_Tour.jpg/600px-One_Ok_Rock_NRJ_Music_Tour.jpg',
 };
 
 const CONCERTS = [

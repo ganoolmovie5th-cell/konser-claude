@@ -798,11 +798,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // C. Setlist — di atas kategori tiket (.modal-ticket-area)
         const setlistHtml = SetlistPredict.render(c.id);
         if (setlistHtml) {
-          const anchor = modal.querySelector('.modal-ticket-area');
+          // Coba beberapa anchor karena ada kemungkinan ticket area sudah dipindah
+          const anchor = modal.querySelector('.modal-ticket-area') ||
+                         modal.querySelector('.modal-desc') ||
+                         modal.querySelector('.modal-details');
           if (anchor) {
             const el = document.createElement('div');
             el.innerHTML = setlistHtml;
             anchor.insertAdjacentElement('beforebegin', el.firstElementChild || el);
+          } else {
+            // Fallback: tambah ke dalam modal langsung
+            const el = document.createElement('div');
+            el.innerHTML = setlistHtml;
+            modal.appendChild(el.firstElementChild || el);
           }
         }
 
@@ -1015,3 +1023,90 @@ const TicketMarket = (() => {
   return { render, handleSubmit, switchTab };
 })();
 window.TicketMarket = TicketMarket;
+
+
+
+/* ================================================================
+   8. KRITIK & SARAN — kirim ke listconcerttour@gmail.com via EmailJS
+   ================================================================ */
+const FeedbackForm = (() => {
+
+  function render() {
+    return `
+      <div class="fb-section" id="fbSection">
+        <div class="gb-header">
+          <h4>📬 Kritik &amp; Saran</h4>
+        </div>
+        <p class="gb-desc">Punya masukan, laporan data salah, atau saran fitur baru? Kirim ke kami!</p>
+        <form class="fb-form" id="fbForm" onsubmit="FeedbackForm.handleSubmit(event)">
+          <div class="gb-form-row">
+            <input class="gb-input" name="from_name" type="text" placeholder="Nama kamu (opsional)" maxlength="50" />
+            <input class="gb-input" name="from_email" type="email" placeholder="Email (opsional)" maxlength="100" />
+          </div>
+          <div class="fb-type-row">
+            <label class="tm-type-opt"><input type="radio" name="type" value="kritik" checked /> 🔴 Kritik</label>
+            <label class="tm-type-opt"><input type="radio" name="type" value="saran" /> 💡 Saran</label>
+            <label class="tm-type-opt"><input type="radio" name="type" value="data" /> 📋 Data Salah</label>
+            <label class="tm-type-opt"><input type="radio" name="type" value="lainnya" /> 💬 Lainnya</label>
+          </div>
+          <textarea class="fb-textarea" name="message" placeholder="Tuliskan pesan kamu di sini... (min 10 karakter)" rows="4" maxlength="1000" required></textarea>
+          <button class="gb-submit fb-btn" type="submit" id="fbSubmitBtn">📬 Kirim Pesan</button>
+        </form>
+        <div class="fb-msg" id="fbMsg"></div>
+      </div>`;
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn  = document.getElementById('fbSubmitBtn');
+    const msg  = document.getElementById('fbMsg');
+
+    const name    = form.from_name?.value?.trim()  || 'Anonim';
+    const email   = form.from_email?.value?.trim() || 'Tidak dicantumkan';
+    const type    = form.querySelector('input[name="type"]:checked')?.value || 'lainnya';
+    const message = form.message?.value?.trim();
+
+    if (!message || message.length < 10) {
+      showToast('⚠️ Pesan minimal 10 karakter.', 'error'); return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = 'Mengirim...';
+
+    try {
+      const result = await emailjs.send(
+        'service_concertid',
+        'template_feedback',
+        {
+          from_name:  name,
+          from_email: email,
+          type:       type.charAt(0).toUpperCase() + type.slice(1),
+          message:    message,
+          sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
+        }
+      );
+
+      if (result.status === 200) {
+        btn.textContent = '✅ Terkirim!';
+        if (msg) {
+          msg.innerHTML = '🎉 Terima kasih! Pesan kamu sudah kami terima.';
+          msg.style.color = '#4ade80';
+        }
+        form.reset();
+        showToast('📬 Pesan berhasil dikirim!', 'success', 4000);
+      }
+    } catch (err) {
+      btn.disabled    = false;
+      btn.textContent = '📬 Kirim Pesan';
+      if (msg) {
+        msg.textContent = '⚠️ Gagal kirim. Coba lagi nanti.';
+        msg.style.color = '#f87171';
+      }
+      showToast('⚠️ Gagal kirim pesan.', 'error');
+    }
+  }
+
+  return { render, handleSubmit };
+})();
+window.FeedbackForm = FeedbackForm;

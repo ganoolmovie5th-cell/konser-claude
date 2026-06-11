@@ -572,12 +572,12 @@ const SpotifyIntegration = (() => {
     'ateez-2026':                    '1z4g3DjMEIg9KORHMTSyeR',
     'the-neighbourhood-jakarta-2026':'4kSGbjWGxLwowfd57V9of3',
     'bryan-adams-jakarta-2026':      '3Z02hBLubJxuFJfhacLuqt',
-    'five-sos-jakarta-2026':         '5WUlDfRSoLAfcVSX1WnrxN',
+    'five-sos-jakarta-2026':         '5WUlDfRSoLAfcVSX1WnrxN', // verified ✅
     'java-jazz-2026':                '0LyfQWJT6nXafLPZqxe9Of',
     'lalala-fest-2026':              '7jy3rLJdaqkdoif9IUQ2km',
     'exo-exhorizon-jakarta-2026':    '3cjEqqelV9zb4BYE3KB9YN',
     'enhypen-jakarta-2027':          '0s4QNfO6DVyRdFIMy3Af8l',
-    'westlife-jakarta-2027':         '0NQiuqFGqfm4p0sR1OtCiz',
+    'westlife-jakarta-2027':         '4Hv3tMbiSrHUbJOvFKSljZ', // fixed ✅
     'jaehyun-jakarta-2026':          '7wlFHeNHpZaHHUHhSFa6Fz',
     'ariana-grande-jakarta-rumor':   '66CXWjxzNUsdJxJ2JdwvnR',
     'olivia-rodrigo-jakarta-rumor':  '1McMsnEElThX1knmY4oliG',
@@ -588,12 +588,15 @@ const SpotifyIntegration = (() => {
     'coldplay-jakarta-rumor':        '4gzpq5DkT2qDeGs86M3XHD',
     'ed-sheeran-jakarta-rumor':      '6eUKZXaKkcviH0Ku9w2n3V',
     'dua-lipa-jakarta-rumor':        '6M2wZ9GZgrQXHCFfjv46we',
-    'aespa-jakarta-2026':          '4Mw9Gcu1LYa2PjGMxFQosB',
-    'nct-wish-jakarta-2026':       '2iIwDCjBQQmNnGSioTwuxW',
-    'deep-purple-jakarta-2026':    '574AQcqOjnVFgGJeHHBRaO',
-    'monsta-x-jakarta-2026':       '1MM6LmMzQ7j71qOIDIRTOS',
-    'treasure-jakarta-2026':       '2NnLYjmNRFyHuHs4NHYFPK',
-    'one-ok-rock-jakarta-2026':    '2TAA7gurOUNrFaGUq7BPFX',
+    'aespa-jakarta-2026':            '4Mw9Gcu1LYa2PjGMxFQosB',
+    'nct-wish-jakarta-2026':         '6VkBPOxMl5uFtXPX7BIzQR', // fixed ✅ NCT WISH (SM)
+    'deep-purple-jakarta-2026':      '568ZhdwyaiCyOGJRtNYhWf', // fixed ✅
+    'monsta-x-jakarta-2026':         '7v4imS0CP6wOFPYMmMKkUl', // fixed ✅
+    'treasure-jakarta-2026':         '6QFhbPfAMQGBi6j1W1DQFJ', // fixed ✅ YG TREASURE
+    'one-ok-rock-jakarta-2026':      '5MlWViXkBEEEPYBvbXH5Bh', // fixed ✅
+    'fforever-jakarta-2026':         null,
+    'perses-jakarta-2026':           null,
+    'hammersonic-2026':              null,
   };
 
   function getSpotifyId(concertId) {

@@ -45,6 +45,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <!-- EmailJS untuk Kritik & Saran -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function() {
+      // EmailJS Public Key — ganti dengan key kamu dari emailjs.com
+      emailjs.init({ publicKey: 'REPLACE_WITH_YOUR_EMAILJS_PUBLIC_KEY' });
+    })();
+  </script>
 </head>
 <body>
 
@@ -370,6 +378,17 @@
     }
   </script>
 
+  <!-- KRITIK & SARAN -->
+  <section class="feedback-section">
+    <div class="container">
+      <div class="section-header" style="margin-bottom:24px;">
+        <h2>📬 Kritik <span class="gradient-text">&amp; Saran</span></h2>
+        <p>Bantu kami berkembang — laporkan data salah, berikan saran fitur, atau ceritakan pengalamanmu.</p>
+      </div>
+      <div class="fb-card" id="fbCard"></div>
+    </div>
+  </section>
+
   <!-- FOOTER -->
   <footer class="footer">
     <div class="container footer-inner">
@@ -461,6 +480,15 @@
   <script src="features.js"></script>
   <script src="features2.js"></script>
   <script src="features3.js"></script>
+  <script>
+    // Inisialisasi Kritik & Saran setelah DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const fbCard = document.getElementById('fbCard');
+      if (fbCard && typeof FeedbackForm !== 'undefined') {
+        fbCard.innerHTML = FeedbackForm.render();
+      }
+    });
+  </script>
   <!-- chatbot.js disabled sementara -->
   <!-- <script src="chatbot.js"></script> -->
 </body>

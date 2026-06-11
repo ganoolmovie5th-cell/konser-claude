@@ -358,7 +358,7 @@ const Discussion = (() => {
     return uid;
   }
 
-  function add(id, { author, text }) {
+  function add(id, { author, text, replyTo = null }) {
     if (!text || text.trim().length < 3) return { ok: false, msg: 'Komentar minimal 3 karakter.' };
     const all = getAll();
     if (!all[id]) all[id] = [];
@@ -368,8 +368,9 @@ const Discussion = (() => {
       text: text.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;').slice(0, 300),
       date: new Date().toISOString(),
       likes: 0,
+      replyTo: replyTo || null, // { author, text snippet }
     });
-    if (all[id].length > 50) all[id] = all[id].slice(0, 50);
+    if (all[id].length > 100) all[id] = all[id].slice(0, 100);
     saveAll(all);
     return { ok: true };
   }
@@ -404,8 +405,9 @@ const Discussion = (() => {
         </div>
         <form class="disc-form" onsubmit="Discussion.handleSubmit(event, '${concertId}')">
           <input class="disc-name" type="text" placeholder="Nama (opsional)" maxlength="30" />
+          <div id="discReplyPreview_${concertId}" class="disc-reply-preview" style="display:none"></div>
           <div class="disc-input-row">
-            <textarea class="disc-textarea" placeholder="Tulis komentar, tanya sesuatu, atau bagikan info... (max 300 karakter)" rows="2" maxlength="300" required></textarea>
+            <textarea class="disc-textarea" placeholder="Tulis komentar... (max 300 karakter)" rows="2" maxlength="300" required></textarea>
             <button class="disc-submit" type="submit">Kirim</button>
           </div>
         </form>
@@ -416,8 +418,12 @@ const Discussion = (() => {
                 <div class="disc-avatar">${c.author.charAt(0).toUpperCase()}</div>
                 <div class="disc-body">
                   <div class="disc-meta"><strong>${c.author}</strong> <span>${timeAgo(c.date)}</span></div>
+                  ${c.replyTo ? `<div class="disc-reply-quote">↩ <strong>${c.replyTo.author}:</strong> ${c.replyTo.text}</div>` : ''}
                   <div class="disc-text">${c.text}</div>
-                  <button class="disc-like" onclick="Discussion.likeAndUpdate('${concertId}', ${i}, this)">👍 ${c.likes || 0}</button>
+                  <div class="disc-actions">
+                    <button class="disc-like" onclick="Discussion.likeAndUpdate('${concertId}', ${i}, this)">👍 ${c.likes || 0}</button>
+                    <button class="disc-reply-btn" onclick="Discussion.setReply('${concertId}', ${i})">↩ Reply</button>
+                  </div>
                 </div>
               </div>`).join('')
             : '<div class="disc-empty">Jadilah yang pertama berkomentar! 💬</div>'
@@ -426,14 +432,41 @@ const Discussion = (() => {
       </div>`;
   }
 
+  function setReply(concertId, idx) {
+    const comments = getFor(concertId);
+    const c = comments[idx];
+    if (!c) return;
+    // Simpan info reply di form
+    const form    = document.querySelector(`#disc_${concertId} .disc-form`);
+    const preview = document.getElementById(`discReplyPreview_${concertId}`);
+    const textarea = form?.querySelector('.disc-textarea');
+    if (!form || !preview) return;
+    form.dataset.replyAuthor = c.author;
+    form.dataset.replyText   = c.text.slice(0, 60);
+    preview.style.display = 'flex';
+    preview.innerHTML = `
+      <span class="disc-reply-to">↩ Membalas <strong>${c.author}</strong>: ${c.text.slice(0,50)}${c.text.length > 50 ? '...' : ''}</span>
+      <button class="disc-reply-cancel" onclick="Discussion.cancelReply('${concertId}')">✕</button>`;
+    textarea?.focus();
+  }
+
+  function cancelReply(concertId) {
+    const form    = document.querySelector(`#disc_${concertId} .disc-form`);
+    const preview = document.getElementById(`discReplyPreview_${concertId}`);
+    if (form) { delete form.dataset.replyAuthor; delete form.dataset.replyText; }
+    if (preview) preview.style.display = 'none';
+  }
+
   function handleSubmit(e, concertId) {
     e.preventDefault();
     const form   = e.target;
     const author = form.querySelector('.disc-name')?.value || 'Anonim';
     const text   = form.querySelector('.disc-textarea')?.value || '';
-    const result = add(concertId, { author, text });
+    const replyTo = form.dataset.replyAuthor
+      ? { author: form.dataset.replyAuthor, text: form.dataset.replyText }
+      : null;
+    const result = add(concertId, { author, text, replyTo });
     if (!result.ok) { showToast('⚠️ ' + result.msg, 'error'); return; }
-    // Re-render
     const section = document.getElementById(`disc_${concertId}`);
     if (section) section.outerHTML = render(concertId);
     showToast('💬 Komentar berhasil dikirim!', 'success', 2000);
@@ -445,7 +478,7 @@ const Discussion = (() => {
     if (btn) { btn.textContent = `👍 ${all[idx]?.likes || 0}`; btn.disabled = true; }
   }
 
-  return { render, handleSubmit, likeAndUpdate, getFor };
+  return { render, handleSubmit, likeAndUpdate, setReply, cancelReply, getFor };
 })();
 window.Discussion = Discussion;
 
@@ -676,8 +709,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. Ikuti di (Social media links)
         appendAfterLast(SocialMedia.renderLinks(c.id, c.artist));
 
-        // 4. Diskusi
-        appendAfterLast(Discussion.render(c.id));
+        // 4. Diskusi — hanya untuk confirmed & rumor (bukan past)
+        if (c.rawDate >= new Date()) {
+          appendAfterLast(Discussion.render(c.id));
+        }
 
         // 5. Rating & Review
         if (typeof window.ConcertReviews !== 'undefined') {
