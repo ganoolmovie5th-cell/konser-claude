@@ -1446,15 +1446,7 @@ openModal = function(id) {
   // 3. Update URL for deep link
   history.replaceState(null, '', `${window.location.pathname}?concert=${id}`);
 
-  // 4. Going/Interested — hanya untuk konser belum selesai
-  if (!_isPast && typeof SocialFeatures !== 'undefined') {
-    const disclaimer = mc.querySelector('.modal-disclaimer');
-    if (disclaimer) {
-      const socialEl = document.createElement('div');
-      socialEl.innerHTML = SocialFeatures.renderBadges(c.id);
-      disclaimer.insertAdjacentElement('beforebegin', socialEl.firstElementChild || socialEl);
-    }
-  }
+  // Going/Interested di-inject oleh features.js (setelah disclaimer)
 
   // 5. Track click
   try {

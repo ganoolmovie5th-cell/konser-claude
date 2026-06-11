@@ -628,28 +628,7 @@ window.SpotifyIntegration = SpotifyIntegration;
    ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Patch openModal untuk inject Spotify langsung setelah disclaimer ──
-  const _prevOpenModal = window.openModal;
-  if (typeof _prevOpenModal === 'function') {
-    window.openModal = function(id) {
-      _prevOpenModal(id);
-      const c  = typeof CONCERTS !== 'undefined' ? CONCERTS.find(x => x.id === id) : null;
-      if (!c) return;
-      const mc = document.getElementById('modalContent');
-      if (!mc) return;
-
-      // Spotify — inject sinkron langsung setelah .modal-disclaimer
-      const spotifyHtml = SpotifyIntegration.renderEmbed(c.id, c.artist);
-      if (spotifyHtml) {
-        const disclaimer = mc.querySelector('.modal-disclaimer');
-        if (disclaimer) {
-          const el = document.createElement('div');
-          el.innerHTML = spotifyHtml;
-          disclaimer.insertAdjacentElement('afterend', el.firstElementChild || el);
-        }
-      }
-    };
-  }
+  // ── Patch openModal untuk inject Spotify — dihandle oleh features.js ──
 
   // ── Inject tombol di filter bar (setelah sort-wrap) ──
   const sortWrap = document.querySelector('.sort-wrap');

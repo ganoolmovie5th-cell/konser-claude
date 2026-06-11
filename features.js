@@ -721,7 +721,8 @@ window.UGC = UGC;
    ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Patch openModal — inject semua section dengan urutan bersih
+  // Patch openModal — SATU TEMPAT untuk semua inject bawah disclaimer
+  // Urutan: Going/Interested → Spotify → Ikuti di → Diskusi → Rating & Review → Foto dari Fans
   const _baseFeaturesOpenModal = window.openModal;
   if (typeof _baseFeaturesOpenModal === 'function') {
     window.openModal = function(id) {
@@ -731,61 +732,69 @@ document.addEventListener('DOMContentLoaded', () => {
       const mc = document.getElementById('modalContent');
       if (!mc) return;
 
-      // 1. Price history — setelah modal-ticket-area (di atas)
-      PriceTracker.seedHistory(c);
-      const priceHistory = PriceTracker.renderMiniChart(c.id);
-      if (priceHistory) {
-        const ticketArea = mc.querySelector('.modal-ticket-area');
-        if (ticketArea) {
-          const el = document.createElement('div');
-          el.innerHTML = priceHistory;
-          ticketArea.insertAdjacentElement('afterend', el.firstElementChild || el);
+      // Price history — setelah modal-ticket-area (tetap di atas)
+      {
+        PriceTracker.seedHistory(c);
+        const ph = PriceTracker.renderMiniChart(c.id);
+        if (ph) {
+          const ticketArea = mc.querySelector('.modal-ticket-area');
+          if (ticketArea) {
+            const el = document.createElement('div');
+            el.innerHTML = ph;
+            ticketArea.insertAdjacentElement('afterend', el.firstElementChild || el);
+          }
         }
       }
 
-      // Semua section bawah di-inject setelah browser selesai render modal
-      // Pakai requestAnimationFrame untuk pastikan DOM sudah stabil
+      // Semua section di bawah disclaimer — inject satu kali dalam satu rAF
       requestAnimationFrame(() => {
         const modal = document.getElementById('modalContent');
         if (!modal) return;
-
         const disclaimer = modal.querySelector('.modal-disclaimer');
         if (!disclaimer) return;
 
-        // Buat fragment dengan semua section sekaligus
-        // Urutan: Ikuti di → Diskusi → Rating & Review → Foto dari Fans
-
-        // A. Ikuti di (Social media links)
-        const smHtml = SocialMedia.renderLinks(c.id, c.artist);
-        if (smHtml) {
+        // Helper: tambahkan section setelah elemen terakhir yang sudah ada
+        let lastEl = disclaimer;
+        function appendAfterLast(html) {
+          if (!html) return;
           const el = document.createElement('div');
-          el.innerHTML = smHtml;
-          disclaimer.insertAdjacentElement('afterend', el.firstElementChild || el);
+          el.innerHTML = html;
+          const node = el.firstElementChild || el;
+          lastEl.insertAdjacentElement('afterend', node);
+          lastEl = node;
         }
 
-        // B. Diskusi
-        const discHtml = Discussion.render(c.id);
-        const anchorSm = modal.querySelector('.social-links') || disclaimer;
-        const discEl   = document.createElement('div');
-        discEl.innerHTML = discHtml;
-        anchorSm.insertAdjacentElement('afterend', discEl.firstElementChild || discEl);
+        // 1. Going & Interested — selalu tampil (termasuk konser past, data actual)
+        if (typeof SocialFeatures !== 'undefined') {
+          appendAfterLast(SocialFeatures.renderBadges(c.id));
+        }
 
-        // C. Rating & Review
+        // 2. Spotify Preview
+        if (typeof SpotifyIntegration !== 'undefined') {
+          appendAfterLast(SpotifyIntegration.renderEmbed(c.id, c.artist));
+        }
+
+        // 3. Ikuti di (Social media links)
+        appendAfterLast(SocialMedia.renderLinks(c.id, c.artist));
+
+        // 4. Diskusi
+        appendAfterLast(Discussion.render(c.id));
+
+        // 5. Rating & Review
         if (typeof window.ConcertReviews !== 'undefined') {
-          const rvHtml  = window.ConcertReviews.render(id);
-          const anchorDisc = modal.querySelector('.disc-section') || anchorSm;
-          const rvEl = document.createElement('div');
-          rvEl.innerHTML = rvHtml;
-          anchorDisc.insertAdjacentElement('afterend', rvEl.firstElementChild || rvEl);
-          window.ConcertReviews.bind(id);
+          const rvHtml = window.ConcertReviews.render(id);
+          if (rvHtml) {
+            const rvEl = document.createElement('div');
+            rvEl.innerHTML = rvHtml;
+            const rvNode = rvEl.firstElementChild || rvEl;
+            lastEl.insertAdjacentElement('afterend', rvNode);
+            lastEl = rvNode;
+            window.ConcertReviews.bind(id);
+          }
         }
 
-        // D. Foto dari Fans (paling bawah)
-        const ugcHtml  = UGC.render(c.id);
-        const anchorRv = modal.querySelector('.rv-section') || modal.querySelector('.disc-section') || disclaimer;
-        const ugcEl    = document.createElement('div');
-        ugcEl.innerHTML = ugcHtml;
-        anchorRv.insertAdjacentElement('afterend', ugcEl.firstElementChild || ugcEl);
+        // 6. Foto dari Fans (paling bawah)
+        appendAfterLast(UGC.render(c.id));
       });
     };
   }
