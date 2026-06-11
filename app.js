@@ -756,7 +756,7 @@ const CONCERTS = [
     city: 'Senayan, Jakarta Pusat',
     promotor: 'Belum diumumkan',
     ticketPlatform: 'TBA',
-    ticketUrl: '#',
+    ticketUrl: 'https://www.loket.com/event?keyword=Westlife+Jakarta',
     priceRange: 'Belum diumumkan',
     priceMin: 0, priceMax: 0,
     ticketCategories: [{ name: 'Semua kategori', price: 'Belum diumumkan' }],
@@ -777,7 +777,7 @@ const CONCERTS = [
     city: 'Semanggi, Jakarta Selatan',
     promotor: 'Belum diumumkan',
     ticketPlatform: 'TBA',
-    ticketUrl: '#',
+    ticketUrl: 'https://www.loket.com/event?keyword=Perses+Jakarta',
     priceRange: 'Belum diumumkan',
     priceMin: 0, priceMax: 0,
     ticketCategories: [{ name: 'Semua kategori', price: 'Belum diumumkan' }],
@@ -798,7 +798,7 @@ const CONCERTS = [
     city: 'Jakarta',
     promotor: 'Belum diumumkan',
     ticketPlatform: 'TBA',
-    ticketUrl: '#',
+    ticketUrl: 'https://www.loket.com/event?keyword=Jaehyun+Jakarta',
     priceRange: 'Belum diumumkan',
     priceMin: 0, priceMax: 0,
     ticketCategories: [{ name: 'Semua kategori', price: 'Belum diumumkan' }],
@@ -997,7 +997,7 @@ function openModal(id) {
       ${!past && !rumor
         ? `<a class="btn btn-primary" href="${c.ticketUrl}" target="_blank" rel="noopener">🎫 Beli Tiket Sekarang</a>`
         : rumor
-          ? `<a class="btn btn-rumor-outline" href="${c.ticketUrl}" target="_blank" rel="noopener">🔔 Pantau Info Resmi</a>`
+          ? `<a class="btn btn-rumor-outline" href="${c.ticketUrl && c.ticketUrl !== '#' ? c.ticketUrl : 'https://www.google.com/search?q=' + encodeURIComponent(c.artist + ' Jakarta concert 2026')}" target="_blank" rel="noopener">🔔 Pantau Info Resmi</a>`
           : `<button class="btn btn-disabled" disabled>Konser Telah Selesai</button>`
       }
     </div>
