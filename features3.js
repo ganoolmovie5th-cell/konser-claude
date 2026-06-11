@@ -798,7 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // C. Setlist — semua konser (past = aktual, upcoming = prediksi)
         const setlistHtml = SetlistPredict.render(c.id);
         if (setlistHtml) {
-          const anchor = modal.querySelector('.price-history') || modal.querySelector('.modal-ticket-area');
+          const anchor = modal.querySelector('.modal-ticket-area');
           if (anchor) {
             const el = document.createElement('div');
             el.innerHTML = setlistHtml;
@@ -809,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // D. Konverter Harga — hanya confirmed + upcoming + ada harga
         const fxHtml = PriceConverter.render(c);
         if (fxHtml) {
-          const anchor = modal.querySelector('.setlist-section') || modal.querySelector('.price-history') || modal.querySelector('.modal-ticket-area');
+          const anchor = modal.querySelector('.setlist-section') || modal.querySelector('.modal-ticket-area');
           if (anchor) {
             const el = document.createElement('div');
             el.innerHTML = fxHtml;
@@ -817,13 +817,13 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // E. Group Buying — paling bawah
-        const ugcSection = modal.querySelector('.ugc-section');
-        const gbHtml     = GroupBuying.render(c.id);
+        // E. Group Buying — setelah .disc-section (bawah Diskusi)
+        const gbHtml = GroupBuying.render(c.id);
         if (gbHtml) {
-          const el = document.createElement('div');
+          const anchor = modal.querySelector('.disc-section');
+          const el     = document.createElement('div');
           el.innerHTML = gbHtml;
-          if (ugcSection) ugcSection.insertAdjacentElement('afterend', el.firstElementChild || el);
+          if (anchor) anchor.insertAdjacentElement('afterend', el.firstElementChild || el);
           else modal.appendChild(el.firstElementChild || el);
         }
       }));

@@ -277,98 +277,6 @@ const SocialFeatures = (() => {
 window.SocialFeatures = SocialFeatures;
 
 /* ================================================================
-   6. HARGA TRACKER / PRICE HISTORY
-   ================================================================ */
-const PriceTracker = (() => {
-  const KEY = 'cid_price_history';
-
-  function getHistory(id) {
-    try {
-      const all = JSON.parse(localStorage.getItem(KEY) || '{}');
-      return all[id] || [];
-    } catch { return []; }
-  }
-
-  function addEntry(id, priceMin, priceMax) {
-    try {
-      const all = JSON.parse(localStorage.getItem(KEY) || '{}');
-      if (!all[id]) all[id] = [];
-      const today = new Date().toISOString().split('T')[0];
-      // Avoid duplicate entries for same day
-      if (all[id].length && all[id][all[id].length - 1].date === today) return;
-      all[id].push({ date: today, min: priceMin, max: priceMax });
-      // Keep last 30 entries
-      if (all[id].length > 30) all[id] = all[id].slice(-30);
-      localStorage.setItem(KEY, JSON.stringify(all));
-    } catch {}
-  }
-
-  // Seed some fake history for demo (last 7 days)
-  function seedHistory(concert) {
-    if (!concert.priceMin || concert.priceMin === 0) return;
-    const existing = getHistory(concert.id);
-    if (existing.length >= 3) return; // already seeded
-    try {
-      const all = JSON.parse(localStorage.getItem(KEY) || '{}');
-      all[concert.id] = [];
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const variance = Math.round((Math.random() - 0.5) * concert.priceMin * 0.05);
-        all[concert.id].push({
-          date: d.toISOString().split('T')[0],
-          min: concert.priceMin + variance,
-          max: concert.priceMax + variance,
-        });
-      }
-      localStorage.setItem(KEY, JSON.stringify(all));
-    } catch {}
-  }
-
-  function renderMiniChart(id) {
-    const hist = getHistory(id);
-    if (hist.length < 2) return '';
-    const maxVal = Math.max(...hist.map(h => h.max));
-    const minVal = Math.min(...hist.map(h => h.min));
-    const range  = maxVal - minVal || 1;
-    const W = 180, H = 48;
-    const pts = hist.map((h, i) => {
-      const x = Math.round((i / (hist.length - 1)) * W);
-      const y = Math.round(H - ((h.min - minVal) / range) * H);
-      return `${x},${y}`;
-    }).join(' ');
-    const last    = hist[hist.length - 1];
-    const first   = hist[0];
-    const diff    = last.min - first.min;
-    const trend   = diff > 0 ? '📈 Naik' : diff < 0 ? '📉 Turun' : '➡️ Stabil';
-    const trendCl = diff > 0 ? 'trend-up' : diff < 0 ? 'trend-down' : 'trend-flat';
-    return `
-      <div class="price-history">
-        <div class="ph-header">
-          <span class="ph-label">📊 Riwayat Harga (7 hari)</span>
-          <span class="ph-trend ${trendCl}">${trend}</span>
-        </div>
-        <svg class="ph-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-          <polyline points="${pts}" fill="none" stroke="url(#ph-grad)" stroke-width="2" stroke-linejoin="round"/>
-          <defs>
-            <linearGradient id="ph-grad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#a855f7"/>
-              <stop offset="100%" stop-color="#ec4899"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <div class="ph-range">
-          <span>Min: <b>Rp ${(last.min/1e6).toFixed(1)}jt</b></span>
-          <span>Max: <b>Rp ${(last.max/1e6).toFixed(1)}jt</b></span>
-        </div>
-      </div>`;
-  }
-
-  return { getHistory, addEntry, seedHistory, renderMiniChart };
-})();
-window.PriceTracker = PriceTracker;
-
-/* ================================================================
    7. SOCIAL MEDIA INTEGRATION — Twitter/X & Instagram feed links
    ================================================================ */
 const SocialMedia = (() => {
@@ -736,20 +644,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!c) return;
       const mc = document.getElementById('modalContent');
       if (!mc) return;
-
-      // Price history — setelah modal-ticket-area (tetap di atas)
-      {
-        PriceTracker.seedHistory(c);
-        const ph = PriceTracker.renderMiniChart(c.id);
-        if (ph) {
-          const ticketArea = mc.querySelector('.modal-ticket-area');
-          if (ticketArea) {
-            const el = document.createElement('div');
-            el.innerHTML = ph;
-            ticketArea.insertAdjacentElement('afterend', el.firstElementChild || el);
-          }
-        }
-      }
 
       // Semua section di bawah disclaimer — inject satu kali dalam satu rAF
       requestAnimationFrame(() => {
