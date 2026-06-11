@@ -588,7 +588,12 @@ const SpotifyIntegration = (() => {
     'coldplay-jakarta-rumor':        '4gzpq5DkT2qDeGs86M3XHD',
     'ed-sheeran-jakarta-rumor':      '6eUKZXaKkcviH0Ku9w2n3V',
     'dua-lipa-jakarta-rumor':        '6M2wZ9GZgrQXHCFfjv46we',
-    'aespa-jakarta-rumor':           '4Mw9Gcu1LYa2PjGMxFQosB',
+    'aespa-jakarta-2026':          '4Mw9Gcu1LYa2PjGMxFQosB',
+    'nct-wish-jakarta-2026':       '2iIwDCjBQQmNnGSioTwuxW',
+    'deep-purple-jakarta-2026':    '574AQcqOjnVFgGJeHHBRaO',
+    'monsta-x-jakarta-2026':       '1MM6LmMzQ7j71qOIDIRTOS',
+    'treasure-jakarta-2026':       '2NnLYjmNRFyHuHs4NHYFPK',
+    'one-ok-rock-jakarta-2026':    '2TAA7gurOUNrFaGUq7BPFX',
   };
 
   function getSpotifyId(concertId) {
