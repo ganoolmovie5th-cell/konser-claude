@@ -1125,7 +1125,11 @@ const FeedbackForm = (() => {
       method: 'POST', body: formData,
     });
     const data = await res.json();
-    if (data.success) return data.data.url;
+    if (data.success) {
+      // Pakai image.url (direct, tanpa subdomain i.ibb.co yang bermasalah SSL)
+      // Fallback ke url jika image.url tidak ada
+      return data.data.image?.url || data.data.url;
+    }
     throw new Error(data.error?.message || 'Upload foto gagal');
   }
 
