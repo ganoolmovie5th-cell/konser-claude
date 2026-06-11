@@ -1090,7 +1090,7 @@ const FeedbackForm = (() => {
         type:       type.charAt(0).toUpperCase() + type.slice(1),
         message:    message,
         sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-        photo_url:  photoUrl || 'Tidak ada foto',
+        photo_url:  photoUrl ? `<img src="${photoUrl}" alt="Foto lampiran" style="max-width:500px;border-radius:8px;display:block;" />` : 'Tidak ada foto',
       };
 
       const result = await emailjs.send('service_lq3pvsq', 'template_w8grsoa', payload);
@@ -1119,17 +1119,30 @@ const FeedbackForm = (() => {
   }
 
   async function uploadPhoto(file) {
-    // Upload ke Catbox.moe — free, no signup, SSL valid, URL stabil
-    const formData = new FormData();
-    formData.append('reqtype', 'fileupload');
-    formData.append('userhash', '');
-    formData.append('fileToUpload', file);
-    const res  = await fetch('https://catbox.moe/user/api.php', {
-      method: 'POST', body: formData,
+    // Resize & compress dulu supaya tidak terlalu besar untuk email
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onerror = () => reject('Gagal memuat gambar');
+      img.onload  = () => {
+        const MAX = 800;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          const ratio = Math.min(MAX / width, MAX / height);
+          width  = Math.round(width  * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width  = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        URL.revokeObjectURL(url);
+        // Convert ke base64 JPEG quality 75% — hasil sekitar 50-150KB
+        const base64 = canvas.toDataURL('image/jpeg', 0.75);
+        resolve(base64);
+      };
+      img.src = url;
     });
-    const url = await res.text();
-    if (url && url.startsWith('https://files.catbox.moe/')) return url.trim();
-    throw new Error('Upload foto gagal: ' + url);
   }
 
   function onAttach(input) {
