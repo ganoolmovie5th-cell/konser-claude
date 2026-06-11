@@ -784,14 +784,14 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // B. Sudah Nonton — hanya konser past, setelah modal-actions
+        // B. Sudah Nonton — hanya konser past, tepat setelah .modal-disclaimer
         if (isPastC) {
-          const actions = modal.querySelector('.modal-actions');
-          if (actions) {
+          const disclaimer = modal.querySelector('.modal-disclaimer');
+          if (disclaimer) {
             const el = document.createElement('div');
             el.className = 'bt-wrap';
             el.innerHTML = BeenThere.renderBtn(c.id);
-            actions.insertAdjacentElement('afterend', el);
+            disclaimer.insertAdjacentElement('afterend', el);
           }
         }
 
