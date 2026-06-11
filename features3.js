@@ -1036,6 +1036,17 @@ const FeedbackForm = (() => {
             <label class="tm-type-opt"><input type="radio" name="type" value="lainnya" /> 💬 Lainnya</label>
           </div>
           <textarea class="fb-textarea" name="message" placeholder="Tuliskan pesan kamu di sini... (min 10 karakter)" rows="4" maxlength="1000" required></textarea>
+          <label class="fb-attach-label" for="fbAttach">
+            <span class="fb-attach-icon">📎</span>
+            <span class="fb-attach-text" id="fbAttachText">Lampirkan foto (opsional · JPG/PNG/WebP · maks 2MB)</span>
+          </label>
+          <input class="fb-attach-input" id="fbAttach" type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onchange="FeedbackForm.onAttach(this)" />
+          <div class="fb-attach-preview" id="fbAttachPreview" style="display:none">
+            <img id="fbAttachImg" alt="preview" />
+            <button type="button" class="fb-attach-remove" onclick="FeedbackForm.removeAttach()">✕ Hapus foto</button>
+          </div>
           <button class="gb-submit fb-btn" type="submit" id="fbSubmitBtn">📬 Kirim Pesan</button>
         </form>
         <div class="fb-msg" id="fbMsg"></div>
@@ -1060,18 +1071,20 @@ const FeedbackForm = (() => {
     btn.disabled    = true;
     btn.textContent = 'Mengirim...';
 
+    // Ambil foto jika ada
+    const attachedPhoto = FeedbackForm._attachedPhoto || null;
+
     try {
-      const result = await emailjs.send(
-        'service_lq3pvsq',
-        'template_w8grsoa',
-        {
-          from_name:  name,
-          from_email: email,
-          type:       type.charAt(0).toUpperCase() + type.slice(1),
-          message:    message,
-          sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-        }
-      );
+      const payload = {
+        from_name:  name,
+        from_email: email,
+        type:       type.charAt(0).toUpperCase() + type.slice(1),
+        message:    message,
+        sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
+        photo_info: attachedPhoto ? `Foto dilampirkan (${attachedPhoto.name}, ${(attachedPhoto.size/1024).toFixed(0)}KB)` : 'Tidak ada foto',
+      };
+
+      const result = await emailjs.send('service_lq3pvsq', 'template_w8grsoa', payload);
 
       if (result.status === 200) {
         btn.textContent = '✅ Terkirim!';
@@ -1080,6 +1093,7 @@ const FeedbackForm = (() => {
           msg.style.color = '#4ade80';
         }
         form.reset();
+        FeedbackForm.removeAttach();
         showToast('📬 Pesan berhasil dikirim!', 'success', 4000);
       }
     } catch (err) {
@@ -1095,6 +1109,36 @@ const FeedbackForm = (() => {
     }
   }
 
-  return { render, handleSubmit };
+  function onAttach(input) {
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('⚠️ Hanya file gambar.', 'error'); input.value = ''; return; }
+    if (file.size > 2 * 1024 * 1024) { showToast('⚠️ Ukuran maksimal 2MB.', 'error'); input.value = ''; return; }
+
+    FeedbackForm._attachedPhoto = { name: file.name, size: file.size };
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const preview = document.getElementById('fbAttachPreview');
+      const img     = document.getElementById('fbAttachImg');
+      const label   = document.getElementById('fbAttachText');
+      if (img)     img.src = ev.target.result;
+      if (preview) preview.style.display = 'flex';
+      if (label)   label.textContent = `📎 ${file.name} (${(file.size/1024).toFixed(0)}KB)`;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeAttach() {
+    FeedbackForm._attachedPhoto = null;
+    const input   = document.getElementById('fbAttach');
+    const preview = document.getElementById('fbAttachPreview');
+    const label   = document.getElementById('fbAttachText');
+    if (input)   input.value = '';
+    if (preview) preview.style.display = 'none';
+    if (label)   label.textContent = 'Lampirkan foto (opsional · JPG/PNG/WebP · maks 2MB)';
+  }
+
+  return { render, handleSubmit, onAttach, removeAttach };
 })();
 window.FeedbackForm = FeedbackForm;

@@ -1683,3 +1683,34 @@ html.light .fb-textarea { background: rgba(0,0,0,0.04); color: var(--text); }
   background: rgba(113,113,122,0.08); border: 1px solid rgba(113,113,122,0.15);
   border-radius: var(--radius-sm); margin-bottom: 12px; line-height: 1.5;
 }
+
+
+/* ── KRITIK & SARAN — Attach Foto ── */
+.fb-attach-label {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  padding: 10px 14px; border: 1.5px dashed var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  background: rgba(255,255,255,0.02);
+}
+.fb-attach-label:hover { border-color: rgba(168,85,247,0.45); background: rgba(168,85,247,0.05); }
+.fb-attach-icon { font-size: 1.1rem; flex-shrink: 0; }
+.fb-attach-text { font-size: 0.8rem; color: var(--text-muted); }
+.fb-attach-input { display: none; }
+.fb-attach-preview {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  padding: 10px 14px; border: 1px solid rgba(168,85,247,0.25);
+  border-radius: var(--radius-sm); background: rgba(168,85,247,0.06);
+}
+.fb-attach-preview img {
+  width: 60px; height: 60px; object-fit: cover;
+  border-radius: 6px; flex-shrink: 0; border: 1px solid var(--border);
+}
+.fb-attach-remove {
+  font-size: 0.75rem; color: #f87171; background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25); border-radius: 99px;
+  padding: 4px 10px; cursor: pointer; font-family: var(--font);
+  transition: all 0.18s; white-space: nowrap;
+}
+.fb-attach-remove:hover { background: rgba(239,68,68,0.2); }
+html.light .fb-attach-label { background: rgba(0,0,0,0.02); }
+html.light .fb-attach-preview { background: rgba(168,85,247,0.04); }
