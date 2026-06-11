@@ -1420,16 +1420,23 @@ openModal = function(id) {
   if (modalActions) {
     const shareRow = document.createElement('div');
     shareRow.className = 'modal-share-row';
-    const gcUrl = getGoogleCalendarUrl(c);
-    shareRow.innerHTML = `
-      <button class="btn-action${isWishlisted(c.id) ? ' wishlisted' : ''}"
-        onclick="toggleWishlist('${c.id}');this.classList.toggle('wishlisted');this.innerHTML=isWishlisted('${c.id}')?'❤️ Wishlisted':'🤍 Wishlist'">
-        ${isWishlisted(c.id) ? '❤️ Wishlisted' : '🤍 Wishlist'}
-      </button>
-      ${gcUrl ? `<a class="btn-action" href="${gcUrl}" target="_blank" rel="noopener">📅 Google Calendar</a>` : ''}
-      <button class="btn-action" onclick="openSharePanel('${c.id}')">
-        🔗 Share
-      </button>`;
+    const gcUrl = !past ? getGoogleCalendarUrl(c) : null;
+    if (past) {
+      // Konser sudah selesai — semua action di-disable
+      shareRow.innerHTML = `
+        <button class="btn-action" disabled style="opacity:0.4;cursor:not-allowed;flex:1">❤️ Wishlist</button>
+        <button class="btn-action" disabled style="opacity:0.4;cursor:not-allowed;flex:1">🔗 Share</button>`;
+    } else {
+      shareRow.innerHTML = `
+        <button class="btn-action${isWishlisted(c.id) ? ' wishlisted' : ''}"
+          onclick="toggleWishlist('${c.id}');this.classList.toggle('wishlisted');this.innerHTML=isWishlisted('${c.id}')?'❤️ Wishlisted':'🤍 Wishlist'">
+          ${isWishlisted(c.id) ? '❤️ Wishlisted' : '🤍 Wishlist'}
+        </button>
+        ${gcUrl ? `<a class="btn-action" href="${gcUrl}" target="_blank" rel="noopener">📅 Google Calendar</a>` : ''}
+        <button class="btn-action" onclick="openSharePanel('${c.id}')">
+          🔗 Share
+        </button>`;
+    }
     modalActions.insertAdjacentElement('beforebegin', shareRow);
   }
 
@@ -1445,9 +1452,9 @@ openModal = function(id) {
     ConcertReviews.bind(id);
   }
 
-  // 5. Inject social features before disclaimer
+  // 5. Inject social features before disclaimer — hanya untuk konser belum selesai
   const disclaimer2 = mc.querySelector('.modal-disclaimer');
-  if (disclaimer2 && typeof SocialFeatures !== 'undefined') {
+  if (disclaimer2 && typeof SocialFeatures !== 'undefined' && !isPast(c)) {
     const socialEl = document.createElement('div');
     socialEl.innerHTML = SocialFeatures.renderBadges(c.id);
     disclaimer2.insertAdjacentElement('beforebegin', socialEl.firstElementChild || socialEl);

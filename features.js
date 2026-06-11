@@ -639,9 +639,9 @@ const UGC = (() => {
               <img class="ugc-preview-img" id="ugcpreviewimg_${concertId}" alt="preview" />
               <div class="ugc-preview-fields">
                 <input class="ugc-caption-input" id="ugccaption_${concertId}" type="text"
-                  placeholder="Caption foto * (wajib diisi)" maxlength="100" required />
+                  placeholder="Caption foto (opsional)" maxlength="100" />
                 <input class="ugc-author-input" id="ugcauthor_${concertId}" type="text"
-                  placeholder="Nama kamu * (wajib diisi)" maxlength="30" required />
+                  placeholder="Nama kamu (opsional, default: Anonymous)" maxlength="30" />
                 <div class="ugc-preview-actions">
                   <button class="ugc-cancel" onclick="UGC.cancelPreview('${concertId}')">Batal</button>
                   <button class="ugc-submit" onclick="UGC.confirmUpload('${concertId}')">Upload Foto</button>
@@ -691,15 +691,15 @@ const UGC = (() => {
     const author    = document.getElementById(`ugcauthor_${concertId}`)?.value?.trim()  || '';
 
     if (!file)    { showToast('⚠️ Pilih foto terlebih dahulu.', 'error'); return; }
-    if (!caption) { showToast('⚠️ Caption wajib diisi.', 'error'); return; }
-    if (!author)  { showToast('⚠️ Nama wajib diisi.', 'error'); return; }
+    // Nama kosong → Anonymous
+    const finalAuthor = author || 'Anonymous';
 
     const btn = document.querySelector(`#ugc_${concertId} .ugc-submit`);
     if (btn) { btn.disabled = true; btn.textContent = 'Memproses...'; }
 
     try {
       const dataUrl = await processFile(file);
-      const result  = addPhoto(concertId, { dataUrl, caption, author });
+      const result  = addPhoto(concertId, { dataUrl, caption, author: finalAuthor });
       if (!result.ok) { showToast('⚠️ ' + result.msg, 'error'); return; }
 
       // Re-render section
@@ -731,7 +731,44 @@ document.addEventListener('DOMContentLoaded', () => {
       const mc = document.getElementById('modalContent');
       if (!mc) return;
 
-      // Seed & inject price history
+      // Urutan inject setelah .modal-disclaimer:
+      // 1. Social media links (Ikuti di)
+      // 2. Discussion (Diskusi)
+      // 3. Reviews (Rating & Review) — di-inject oleh app.js patch sebelumnya
+      // 4. UGC photos (Foto dari Fans)
+
+      // Social media links — setelah .modal-sources (tampil setelah disclaimer)
+      const smHtml = SocialMedia.renderLinks(c.id, c.artist);
+      if (smHtml) {
+        const disclaimer = mc.querySelector('.modal-disclaimer');
+        if (disclaimer) {
+          const smEl = document.createElement('div');
+          smEl.innerHTML = smHtml;
+          disclaimer.insertAdjacentElement('afterend', smEl.firstElementChild || smEl);
+        }
+      }
+
+      // Discussion — setelah social links
+      const smSection = mc.querySelector('.social-links') || mc.querySelector('.modal-disclaimer');
+      if (smSection) {
+        const discEl = document.createElement('div');
+        discEl.innerHTML = Discussion.render(c.id);
+        smSection.insertAdjacentElement('afterend', discEl.firstElementChild || discEl);
+      }
+
+      // UGC photos — paling bawah (setelah disc-section atau rv-section)
+      setTimeout(() => {
+        const mc2 = document.getElementById('modalContent');
+        if (!mc2) return;
+        const lastSection = mc2.querySelector('.rv-section') || mc2.querySelector('.disc-section');
+        if (lastSection) {
+          const ugcEl = document.createElement('div');
+          ugcEl.innerHTML = UGC.render(c.id);
+          lastSection.insertAdjacentElement('afterend', ugcEl.firstElementChild || ugcEl);
+        }
+      }, 50);
+
+      // Price history — tetap di atas ticket area
       PriceTracker.seedHistory(c);
       const priceHistory = PriceTracker.renderMiniChart(c.id);
       if (priceHistory) {
@@ -741,33 +778,6 @@ document.addEventListener('DOMContentLoaded', () => {
           phEl.innerHTML = priceHistory;
           ticketArea.insertAdjacentElement('afterend', phEl.firstElementChild || phEl);
         }
-      }
-
-      // Social media links
-      const smHtml = SocialMedia.renderLinks(c.id, c.artist);
-      if (smHtml) {
-        const sources = mc.querySelector('.modal-sources');
-        if (sources) {
-          const smEl = document.createElement('div');
-          smEl.innerHTML = smHtml;
-          sources.insertAdjacentElement('beforebegin', smEl.firstElementChild || smEl);
-        }
-      }
-
-      // Discussion
-      const sources = mc.querySelector('.modal-sources');
-      if (sources) {
-        const discEl = document.createElement('div');
-        discEl.innerHTML = Discussion.render(c.id);
-        sources.insertAdjacentElement('afterend', discEl.firstElementChild || discEl);
-      }
-
-      // UGC photos
-      const discSection = mc.querySelector('.disc-section');
-      if (discSection) {
-        const ugcEl = document.createElement('div');
-        ugcEl.innerHTML = UGC.render(c.id);
-        discSection.insertAdjacentElement('afterend', ugcEl.firstElementChild || ugcEl);
       }
     };
   }
