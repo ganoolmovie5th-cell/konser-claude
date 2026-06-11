@@ -1103,11 +1103,13 @@ const FeedbackForm = (() => {
     } catch (err) {
       btn.disabled    = false;
       btn.textContent = '📬 Kirim Pesan';
+      const errMsg = err?.text || err?.message || JSON.stringify(err) || 'Unknown error';
+      console.error('[EmailJS Error]', err);
       if (msg) {
-        msg.textContent = '⚠️ Gagal kirim. Coba lagi nanti.';
+        msg.innerHTML = `⚠️ Error: <code style="font-size:0.75rem;background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;">${errMsg}</code>`;
         msg.style.color = '#f87171';
       }
-      showToast('⚠️ Gagal kirim pesan.', 'error');
+      showToast('⚠️ Gagal kirim: ' + errMsg.slice(0, 60), 'error', 6000);
     }
   }
 
