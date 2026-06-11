@@ -573,11 +573,10 @@ const SpotifyIntegration = (() => {
     'the-neighbourhood-jakarta-2026':'4kSGbjWGxLwowfd57V9of3',
     'bryan-adams-jakarta-2026':      '3Z02hBLubJxuFJfhacLuqt',
     'five-sos-jakarta-2026':         '5WUlDfRSoLAfcVSX1WnrxN',
-    'java-jazz-2026':                '0LyfQWJT6nXafLPZqxe9Of', // Jon Batiste sebagai headliner
-    'lalala-fest-2026':              '7jy3rLJdaqkdoif9IUQ2km', // Steve Lacy
+    'java-jazz-2026':                '0LyfQWJT6nXafLPZqxe9Of',
+    'lalala-fest-2026':              '7jy3rLJdaqkdoif9IUQ2km',
     'exo-exhorizon-jakarta-2026':    '3cjEqqelV9zb4BYE3KB9YN',
     'enhypen-jakarta-2027':          '0s4QNfO6DVyRdFIMy3Af8l',
-    'the-weeknd-jakarta-2026':       '1Xyo4u8uXC1ZmMpatF05PJ',
     'westlife-jakarta-2027':         '0NQiuqFGqfm4p0sR1OtCiz',
     'jaehyun-jakarta-2026':          '7wlFHeNHpZaHHUHhSFa6Fz',
     'ariana-grande-jakarta-rumor':   '66CXWjxzNUsdJxJ2JdwvnR',
@@ -590,11 +589,6 @@ const SpotifyIntegration = (() => {
     'ed-sheeran-jakarta-rumor':      '6eUKZXaKkcviH0Ku9w2n3V',
     'dua-lipa-jakarta-rumor':        '6M2wZ9GZgrQXHCFfjv46we',
     'aespa-jakarta-rumor':           '4Mw9Gcu1LYa2PjGMxFQosB',
-    'byeon-woo-seok-jakarta-2026':   null,
-    'fforever-jakarta-2026':         null,
-    'perses-jakarta-2026':           null,
-    'bryan-adams-jakarta-2026':      '3Z02hBLubJxuFJfhacLuqt',
-    'mcr-hammersonic-2026':          '3RNrq3jvMZxD9ZyoOZbQOD',
   };
 
   function getSpotifyId(concertId) {
@@ -634,7 +628,7 @@ window.SpotifyIntegration = SpotifyIntegration;
    ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ── Patch openModal untuk inject Spotify ──
+  // ── Patch openModal untuk inject Spotify langsung setelah disclaimer ──
   const _prevOpenModal = window.openModal;
   if (typeof _prevOpenModal === 'function') {
     window.openModal = function(id) {
@@ -644,25 +638,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const mc = document.getElementById('modalContent');
       if (!mc) return;
 
-      // Inject Spotify — setelah rv-section selesai (double rAF agar features.js selesai duluan)
+      // Spotify — inject sinkron langsung setelah .modal-disclaimer
       const spotifyHtml = SpotifyIntegration.renderEmbed(c.id, c.artist);
       if (spotifyHtml) {
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          const mc2 = document.getElementById('modalContent');
-          if (!mc2) return;
-          const ugcSection  = mc2.querySelector('.ugc-section');
-          const rvSection   = mc2.querySelector('.rv-section');
-          const discSection = mc2.querySelector('.disc-section');
+        const disclaimer = mc.querySelector('.modal-disclaimer');
+        if (disclaimer) {
           const el = document.createElement('div');
           el.innerHTML = spotifyHtml;
-          if (ugcSection) {
-            ugcSection.insertAdjacentElement('beforebegin', el.firstElementChild || el);
-          } else {
-            const target = rvSection || discSection;
-            if (target) target.insertAdjacentElement('afterend', el.firstElementChild || el);
-            else mc2.insertAdjacentHTML('beforeend', spotifyHtml);
-          }
-        }));
+          disclaimer.insertAdjacentElement('afterend', el.firstElementChild || el);
+        }
       }
     };
   }
