@@ -795,14 +795,14 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // C. Setlist — semua konser (past = aktual, upcoming = prediksi)
+        // C. Setlist — di atas kategori tiket (.modal-ticket-area)
         const setlistHtml = SetlistPredict.render(c.id);
         if (setlistHtml) {
           const anchor = modal.querySelector('.modal-ticket-area');
           if (anchor) {
             const el = document.createElement('div');
             el.innerHTML = setlistHtml;
-            anchor.insertAdjacentElement('afterend', el.firstElementChild || el);
+            anchor.insertAdjacentElement('beforebegin', el.firstElementChild || el);
           }
         }
 
