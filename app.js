@@ -1415,18 +1415,21 @@ openModal = function(id) {
     modalDetails.insertAdjacentElement('afterend', mapEl);
   }
 
+  // isPast & isRumor sudah tersedia di scope ini
+  const _isPast  = isPast(c);
+  const _isRumor = isRumor(c);
+
   // 2. Inject share row before modal-actions
   const modalActions = mc.querySelector('.modal-actions');
   if (modalActions) {
     const shareRow = document.createElement('div');
     shareRow.className = 'modal-share-row';
-    const gcUrl = !past ? getGoogleCalendarUrl(c) : null;
-    if (past) {
-      // Konser sudah selesai — semua action di-disable
+    if (_isPast) {
       shareRow.innerHTML = `
         <button class="btn-action" disabled style="opacity:0.4;cursor:not-allowed;flex:1">❤️ Wishlist</button>
         <button class="btn-action" disabled style="opacity:0.4;cursor:not-allowed;flex:1">🔗 Share</button>`;
     } else {
+      const gcUrl = getGoogleCalendarUrl(c);
       shareRow.innerHTML = `
         <button class="btn-action${isWishlisted(c.id) ? ' wishlisted' : ''}"
           onclick="toggleWishlist('${c.id}');this.classList.toggle('wishlisted');this.innerHTML=isWishlisted('${c.id}')?'❤️ Wishlisted':'🤍 Wishlist'">
@@ -1444,7 +1447,7 @@ openModal = function(id) {
   history.replaceState(null, '', `${window.location.pathname}?concert=${id}`);
 
   // 4. Going/Interested — hanya untuk konser belum selesai
-  if (!past && typeof SocialFeatures !== 'undefined') {
+  if (!_isPast && typeof SocialFeatures !== 'undefined') {
     const disclaimer = mc.querySelector('.modal-disclaimer');
     if (disclaimer) {
       const socialEl = document.createElement('div');

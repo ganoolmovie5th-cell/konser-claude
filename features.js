@@ -722,14 +722,6 @@ window.UGC = UGC;
 document.addEventListener('DOMContentLoaded', () => {
 
   // Patch openModal — inject semua section dengan urutan bersih
-  // Urutan setelah disclaimer:
-  // [Price History] → di atas ticket area
-  // [Going/Interested] → sebelum disclaimer (di app.js)
-  // [Ikuti di] → setelah disclaimer
-  // [Diskusi] → setelah Ikuti di
-  // [Rating & Review] → setelah Diskusi (reviews.js)
-  // [Foto dari Fans] → paling bawah
-  // [Spotify] → setelah Rating & Review (features2.js)
   const _baseFeaturesOpenModal = window.openModal;
   if (typeof _baseFeaturesOpenModal === 'function') {
     window.openModal = function(id) {
@@ -739,65 +731,62 @@ document.addEventListener('DOMContentLoaded', () => {
       const mc = document.getElementById('modalContent');
       if (!mc) return;
 
-      // Price history — setelah modal-ticket-area
+      // 1. Price history — setelah modal-ticket-area (di atas)
       PriceTracker.seedHistory(c);
       const priceHistory = PriceTracker.renderMiniChart(c.id);
       if (priceHistory) {
         const ticketArea = mc.querySelector('.modal-ticket-area');
         if (ticketArea) {
-          const phEl = document.createElement('div');
-          phEl.innerHTML = priceHistory;
-          ticketArea.insertAdjacentElement('afterend', phEl.firstElementChild || phEl);
+          const el = document.createElement('div');
+          el.innerHTML = priceHistory;
+          ticketArea.insertAdjacentElement('afterend', el.firstElementChild || el);
         }
       }
 
-      // Ikuti di (Social media links) — tepat setelah .modal-disclaimer
-      const disclaimer = mc.querySelector('.modal-disclaimer');
-      if (disclaimer) {
+      // Semua section bawah di-inject setelah browser selesai render modal
+      // Pakai requestAnimationFrame untuk pastikan DOM sudah stabil
+      requestAnimationFrame(() => {
+        const modal = document.getElementById('modalContent');
+        if (!modal) return;
+
+        const disclaimer = modal.querySelector('.modal-disclaimer');
+        if (!disclaimer) return;
+
+        // Buat fragment dengan semua section sekaligus
+        // Urutan: Ikuti di → Diskusi → Rating & Review → Foto dari Fans
+
+        // A. Ikuti di (Social media links)
         const smHtml = SocialMedia.renderLinks(c.id, c.artist);
         if (smHtml) {
-          const smEl = document.createElement('div');
-          smEl.innerHTML = smHtml;
-          disclaimer.insertAdjacentElement('afterend', smEl.firstElementChild || smEl);
+          const el = document.createElement('div');
+          el.innerHTML = smHtml;
+          disclaimer.insertAdjacentElement('afterend', el.firstElementChild || el);
         }
 
-        // Diskusi — setelah .social-links (atau setelah disclaimer jika social-links tidak ada)
-        setTimeout(() => {
-          const mc2 = document.getElementById('modalContent');
-          if (!mc2) return;
-          const afterSocial = mc2.querySelector('.social-links') || mc2.querySelector('.modal-disclaimer');
-          if (afterSocial) {
-            const discEl = document.createElement('div');
-            discEl.innerHTML = Discussion.render(c.id);
-            afterSocial.insertAdjacentElement('afterend', discEl.firstElementChild || discEl);
-          }
+        // B. Diskusi
+        const discHtml = Discussion.render(c.id);
+        const anchorSm = modal.querySelector('.social-links') || disclaimer;
+        const discEl   = document.createElement('div');
+        discEl.innerHTML = discHtml;
+        anchorSm.insertAdjacentElement('afterend', discEl.firstElementChild || discEl);
 
-          // Rating & Review (dari reviews.js) — setelah .disc-section
-          setTimeout(() => {
-            const mc3 = document.getElementById('modalContent');
-            if (!mc3) return;
-            const afterDisc = mc3.querySelector('.disc-section');
-            if (afterDisc && typeof ConcertReviews !== 'undefined') {
-              const rvEl = document.createElement('div');
-              rvEl.innerHTML = ConcertReviews.render(id);
-              afterDisc.insertAdjacentElement('afterend', rvEl.firstElementChild || rvEl);
-              ConcertReviews.bind(id);
-            }
+        // C. Rating & Review
+        if (typeof window.ConcertReviews !== 'undefined') {
+          const rvHtml  = window.ConcertReviews.render(id);
+          const anchorDisc = modal.querySelector('.disc-section') || anchorSm;
+          const rvEl = document.createElement('div');
+          rvEl.innerHTML = rvHtml;
+          anchorDisc.insertAdjacentElement('afterend', rvEl.firstElementChild || rvEl);
+          window.ConcertReviews.bind(id);
+        }
 
-            // Foto dari Fans — paling bawah
-            setTimeout(() => {
-              const mc4 = document.getElementById('modalContent');
-              if (!mc4) return;
-              const lastEl = mc4.querySelector('.rv-section') || mc4.querySelector('.disc-section') || mc4.querySelector('.modal-disclaimer');
-              if (lastEl) {
-                const ugcEl = document.createElement('div');
-                ugcEl.innerHTML = UGC.render(c.id);
-                lastEl.insertAdjacentElement('afterend', ugcEl.firstElementChild || ugcEl);
-              }
-            }, 20);
-          }, 20);
-        }, 0);
-      }
+        // D. Foto dari Fans (paling bawah)
+        const ugcHtml  = UGC.render(c.id);
+        const anchorRv = modal.querySelector('.rv-section') || modal.querySelector('.disc-section') || disclaimer;
+        const ugcEl    = document.createElement('div');
+        ugcEl.innerHTML = ugcHtml;
+        anchorRv.insertAdjacentElement('afterend', ugcEl.firstElementChild || ugcEl);
+      });
     };
   }
 

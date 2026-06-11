@@ -644,30 +644,25 @@ document.addEventListener('DOMContentLoaded', () => {
       const mc = document.getElementById('modalContent');
       if (!mc) return;
 
-      // Inject Spotify — setelah rv-section (Rating & Review), sebelum ugc-section (Foto dari Fans)
+      // Inject Spotify — setelah rv-section selesai (double rAF agar features.js selesai duluan)
       const spotifyHtml = SpotifyIntegration.renderEmbed(c.id, c.artist);
       if (spotifyHtml) {
-        setTimeout(() => {
-          const mc3 = document.getElementById('modalContent');
-          if (!mc3) return;
-          // Cari rv-section; kalau tidak ada pakai disc-section
-          const rvSection   = mc3.querySelector('.rv-section');
-          const discSection = mc3.querySelector('.disc-section');
-          const ugcSection  = mc3.querySelector('.ugc-section');
-          // Inject sebelum ugc, atau setelah rv/disc
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          const mc2 = document.getElementById('modalContent');
+          if (!mc2) return;
+          const ugcSection  = mc2.querySelector('.ugc-section');
+          const rvSection   = mc2.querySelector('.rv-section');
+          const discSection = mc2.querySelector('.disc-section');
+          const el = document.createElement('div');
+          el.innerHTML = spotifyHtml;
           if (ugcSection) {
-            const el = document.createElement('div');
-            el.innerHTML = spotifyHtml;
             ugcSection.insertAdjacentElement('beforebegin', el.firstElementChild || el);
           } else {
             const target = rvSection || discSection;
-            if (target) {
-              const el = document.createElement('div');
-              el.innerHTML = spotifyHtml;
-              target.insertAdjacentElement('afterend', el.firstElementChild || el);
-            }
+            if (target) target.insertAdjacentElement('afterend', el.firstElementChild || el);
+            else mc2.insertAdjacentHTML('beforeend', spotifyHtml);
           }
-        }, 100);
+        }));
       }
     };
   }
