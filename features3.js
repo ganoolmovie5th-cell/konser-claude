@@ -1071,8 +1071,17 @@ const FeedbackForm = (() => {
     btn.disabled    = true;
     btn.textContent = 'Mengirim...';
 
-    // Ambil foto jika ada
-    const attachedPhoto = FeedbackForm._attachedPhoto || null;
+    // Upload foto ke ImgBB jika ada, dapatkan URL
+    let photoUrl = '';
+    const attachedFile = FeedbackForm._attachedFile || null;
+    if (attachedFile) {
+      try {
+        btn.textContent = 'Mengupload foto...';
+        photoUrl = await FeedbackForm.uploadToImgBB(attachedFile);
+      } catch (uploadErr) {
+        showToast('⚠️ Gagal upload foto, pesan tetap dikirim tanpa foto.', 'error', 4000);
+      }
+    }
 
     try {
       const payload = {
@@ -1081,7 +1090,7 @@ const FeedbackForm = (() => {
         type:       type.charAt(0).toUpperCase() + type.slice(1),
         message:    message,
         sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-        photo_info: attachedPhoto ? `Foto dilampirkan (${attachedPhoto.name}, ${(attachedPhoto.size/1024).toFixed(0)}KB)` : 'Tidak ada foto',
+        photo_url:  photoUrl || 'Tidak ada foto',
       };
 
       const result = await emailjs.send('service_lq3pvsq', 'template_w8grsoa', payload);
@@ -1109,13 +1118,24 @@ const FeedbackForm = (() => {
     }
   }
 
+  async function uploadToImgBB(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res  = await fetch('https://api.imgbb.com/1/upload?key=78b1898502c744adca5a5686eed6a102', {
+      method: 'POST', body: formData,
+    });
+    const data = await res.json();
+    if (data.success) return data.data.url;
+    throw new Error(data.error?.message || 'Upload foto gagal');
+  }
+
   function onAttach(input) {
     const file = input.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { showToast('⚠️ Hanya file gambar.', 'error'); input.value = ''; return; }
     if (file.size > 2 * 1024 * 1024) { showToast('⚠️ Ukuran maksimal 2MB.', 'error'); input.value = ''; return; }
 
-    FeedbackForm._attachedPhoto = { name: file.name, size: file.size };
+    FeedbackForm._attachedFile = file;
 
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -1130,7 +1150,7 @@ const FeedbackForm = (() => {
   }
 
   function removeAttach() {
-    FeedbackForm._attachedPhoto = null;
+    FeedbackForm._attachedFile = null;
     const input   = document.getElementById('fbAttach');
     const preview = document.getElementById('fbAttachPreview');
     const label   = document.getElementById('fbAttachText');
@@ -1139,6 +1159,6 @@ const FeedbackForm = (() => {
     if (label)   label.textContent = 'Lampirkan foto (opsional · JPG/PNG/WebP · maks 2MB)';
   }
 
-  return { render, handleSubmit, onAttach, removeAttach };
+  return { render, handleSubmit, uploadToImgBB, onAttach, removeAttach };
 })();
 window.FeedbackForm = FeedbackForm;
