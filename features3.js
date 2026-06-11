@@ -1080,8 +1080,8 @@ const FeedbackForm = (() => {
 
     try {
       const result = await emailjs.send(
-        'service_concertid',
-        'template_feedback',
+        'service_lq3pvsq',
+        'template_w8grsoa',
         {
           from_name:  name,
           from_email: email,
