@@ -721,7 +721,15 @@ window.UGC = UGC;
    ================================================================ */
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Patch openModal dari features.js — inject Price History, Social Links, Discussion, UGC
+  // Patch openModal — inject semua section dengan urutan bersih
+  // Urutan setelah disclaimer:
+  // [Price History] → di atas ticket area
+  // [Going/Interested] → sebelum disclaimer (di app.js)
+  // [Ikuti di] → setelah disclaimer
+  // [Diskusi] → setelah Ikuti di
+  // [Rating & Review] → setelah Diskusi (reviews.js)
+  // [Foto dari Fans] → paling bawah
+  // [Spotify] → setelah Rating & Review (features2.js)
   const _baseFeaturesOpenModal = window.openModal;
   if (typeof _baseFeaturesOpenModal === 'function') {
     window.openModal = function(id) {
@@ -731,44 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const mc = document.getElementById('modalContent');
       if (!mc) return;
 
-      // Urutan inject setelah .modal-disclaimer:
-      // 1. Social media links (Ikuti di)
-      // 2. Discussion (Diskusi)
-      // 3. Reviews (Rating & Review) — di-inject oleh app.js patch sebelumnya
-      // 4. UGC photos (Foto dari Fans)
-
-      // Social media links — setelah .modal-sources (tampil setelah disclaimer)
-      const smHtml = SocialMedia.renderLinks(c.id, c.artist);
-      if (smHtml) {
-        const disclaimer = mc.querySelector('.modal-disclaimer');
-        if (disclaimer) {
-          const smEl = document.createElement('div');
-          smEl.innerHTML = smHtml;
-          disclaimer.insertAdjacentElement('afterend', smEl.firstElementChild || smEl);
-        }
-      }
-
-      // Discussion — setelah social links
-      const smSection = mc.querySelector('.social-links') || mc.querySelector('.modal-disclaimer');
-      if (smSection) {
-        const discEl = document.createElement('div');
-        discEl.innerHTML = Discussion.render(c.id);
-        smSection.insertAdjacentElement('afterend', discEl.firstElementChild || discEl);
-      }
-
-      // UGC photos — paling bawah (setelah disc-section atau rv-section)
-      setTimeout(() => {
-        const mc2 = document.getElementById('modalContent');
-        if (!mc2) return;
-        const lastSection = mc2.querySelector('.rv-section') || mc2.querySelector('.disc-section');
-        if (lastSection) {
-          const ugcEl = document.createElement('div');
-          ugcEl.innerHTML = UGC.render(c.id);
-          lastSection.insertAdjacentElement('afterend', ugcEl.firstElementChild || ugcEl);
-        }
-      }, 50);
-
-      // Price history — tetap di atas ticket area
+      // Price history — setelah modal-ticket-area
       PriceTracker.seedHistory(c);
       const priceHistory = PriceTracker.renderMiniChart(c.id);
       if (priceHistory) {
@@ -778,6 +749,54 @@ document.addEventListener('DOMContentLoaded', () => {
           phEl.innerHTML = priceHistory;
           ticketArea.insertAdjacentElement('afterend', phEl.firstElementChild || phEl);
         }
+      }
+
+      // Ikuti di (Social media links) — tepat setelah .modal-disclaimer
+      const disclaimer = mc.querySelector('.modal-disclaimer');
+      if (disclaimer) {
+        const smHtml = SocialMedia.renderLinks(c.id, c.artist);
+        if (smHtml) {
+          const smEl = document.createElement('div');
+          smEl.innerHTML = smHtml;
+          disclaimer.insertAdjacentElement('afterend', smEl.firstElementChild || smEl);
+        }
+
+        // Diskusi — setelah .social-links (atau setelah disclaimer jika social-links tidak ada)
+        setTimeout(() => {
+          const mc2 = document.getElementById('modalContent');
+          if (!mc2) return;
+          const afterSocial = mc2.querySelector('.social-links') || mc2.querySelector('.modal-disclaimer');
+          if (afterSocial) {
+            const discEl = document.createElement('div');
+            discEl.innerHTML = Discussion.render(c.id);
+            afterSocial.insertAdjacentElement('afterend', discEl.firstElementChild || discEl);
+          }
+
+          // Rating & Review (dari reviews.js) — setelah .disc-section
+          setTimeout(() => {
+            const mc3 = document.getElementById('modalContent');
+            if (!mc3) return;
+            const afterDisc = mc3.querySelector('.disc-section');
+            if (afterDisc && typeof ConcertReviews !== 'undefined') {
+              const rvEl = document.createElement('div');
+              rvEl.innerHTML = ConcertReviews.render(id);
+              afterDisc.insertAdjacentElement('afterend', rvEl.firstElementChild || rvEl);
+              ConcertReviews.bind(id);
+            }
+
+            // Foto dari Fans — paling bawah
+            setTimeout(() => {
+              const mc4 = document.getElementById('modalContent');
+              if (!mc4) return;
+              const lastEl = mc4.querySelector('.rv-section') || mc4.querySelector('.disc-section') || mc4.querySelector('.modal-disclaimer');
+              if (lastEl) {
+                const ugcEl = document.createElement('div');
+                ugcEl.innerHTML = UGC.render(c.id);
+                lastEl.insertAdjacentElement('afterend', ugcEl.firstElementChild || ugcEl);
+              }
+            }, 20);
+          }, 20);
+        }, 0);
       }
     };
   }

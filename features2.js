@@ -653,13 +653,21 @@ document.addEventListener('DOMContentLoaded', () => {
           // Cari rv-section; kalau tidak ada pakai disc-section
           const rvSection   = mc3.querySelector('.rv-section');
           const discSection = mc3.querySelector('.disc-section');
-          const target      = rvSection || discSection;
-          if (target) {
+          const ugcSection  = mc3.querySelector('.ugc-section');
+          // Inject sebelum ugc, atau setelah rv/disc
+          if (ugcSection) {
             const el = document.createElement('div');
             el.innerHTML = spotifyHtml;
-            target.insertAdjacentElement('afterend', el.firstElementChild || el);
+            ugcSection.insertAdjacentElement('beforebegin', el.firstElementChild || el);
+          } else {
+            const target = rvSection || discSection;
+            if (target) {
+              const el = document.createElement('div');
+              el.innerHTML = spotifyHtml;
+              target.insertAdjacentElement('afterend', el.firstElementChild || el);
+            }
           }
-        }, 80); // setelah UGC selesai inject (50ms), sedikit lebih lama
+        }, 100);
       }
     };
   }

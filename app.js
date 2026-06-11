@@ -1440,27 +1440,20 @@ openModal = function(id) {
     modalActions.insertAdjacentElement('beforebegin', shareRow);
   }
 
-  // 3. Update URL for deep link (without page reload)
+  // 3. Update URL for deep link
   history.replaceState(null, '', `${window.location.pathname}?concert=${id}`);
 
-  // 4. Inject review section
-  const modalDisclaimer = mc.querySelector('.modal-disclaimer');
-  if (modalDisclaimer && window.ConcertReviews) {
-    const rvEl = document.createElement('div');
-    rvEl.innerHTML = ConcertReviews.render(id);
-    modalDisclaimer.insertAdjacentElement('afterend', rvEl.firstElementChild || rvEl);
-    ConcertReviews.bind(id);
+  // 4. Going/Interested — hanya untuk konser belum selesai
+  if (!past && typeof SocialFeatures !== 'undefined') {
+    const disclaimer = mc.querySelector('.modal-disclaimer');
+    if (disclaimer) {
+      const socialEl = document.createElement('div');
+      socialEl.innerHTML = SocialFeatures.renderBadges(c.id);
+      disclaimer.insertAdjacentElement('beforebegin', socialEl.firstElementChild || socialEl);
+    }
   }
 
-  // 5. Inject social features before disclaimer — hanya untuk konser belum selesai
-  const disclaimer2 = mc.querySelector('.modal-disclaimer');
-  if (disclaimer2 && typeof SocialFeatures !== 'undefined' && !isPast(c)) {
-    const socialEl = document.createElement('div');
-    socialEl.innerHTML = SocialFeatures.renderBadges(c.id);
-    disclaimer2.insertAdjacentElement('beforebegin', socialEl.firstElementChild || socialEl);
-  }
-
-  // 6. Track click
+  // 5. Track click
   try {
     const cl = JSON.parse(localStorage.getItem('cid_clicks') || '{}');
     cl[id] = (cl[id] || 0) + 1;
