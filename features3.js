@@ -1053,6 +1053,24 @@ const FeedbackForm = (() => {
       </div>`;
   }
 
+  // Rate limiting — max 3 submit per 10 menit
+  function checkRateLimit() {
+    const KEY   = 'cid_fb_rl';
+    const LIMIT = 3;
+    const TTL   = 10 * 60 * 1000; // 10 menit
+    try {
+      const raw  = JSON.parse(localStorage.getItem(KEY) || '{"count":0,"ts":0}');
+      const now  = Date.now();
+      if (now - raw.ts > TTL) {
+        localStorage.setItem(KEY, JSON.stringify({ count: 1, ts: now }));
+        return true;
+      }
+      if (raw.count >= LIMIT) return false;
+      localStorage.setItem(KEY, JSON.stringify({ count: raw.count + 1, ts: raw.ts }));
+      return true;
+    } catch { return true; }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     const form = e.target;
@@ -1066,6 +1084,12 @@ const FeedbackForm = (() => {
 
     if (!message || message.length < 10) {
       showToast('⚠️ Pesan minimal 10 karakter.', 'error'); return;
+    }
+
+    // Rate limit check
+    if (!checkRateLimit()) {
+      showToast('⚠️ Terlalu banyak pengiriman. Coba lagi dalam 10 menit.', 'error', 5000);
+      return;
     }
 
     btn.disabled    = true;
