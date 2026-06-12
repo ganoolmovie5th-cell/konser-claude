@@ -10,9 +10,8 @@
 const TODAY = new Date(); // selalu tanggal hari ini
 
 /* ============================================
-   ARTIST IMAGES — Wikimedia Commons CC-licensed
-   Untuk artis tanpa foto Wikimedia, gunakan
-   gradient CSS (imageUrl: null)
+   ARTIST IMAGES — foto lokal dari folder /images/
+   Naming convention: /images/[concert-id].jpeg
    ============================================ */
 const ARTIST_IMAGES = {
   // ── PAST ──

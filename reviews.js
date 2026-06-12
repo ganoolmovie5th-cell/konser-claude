@@ -33,7 +33,7 @@
     });
     saveAll(all);
 
-    // Update analytics click tracking
+    // Track review submission (terpisah dari cid_views)
     try {
       const cl = JSON.parse(localStorage.getItem('cid_clicks') || '{}');
       cl[id] = (cl[id] || 0) + 1;
