@@ -1114,10 +1114,11 @@ const FeedbackForm = (() => {
         type:       type.charAt(0).toUpperCase() + type.slice(1),
         message:    message,
         sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-        // Kirim base64 murni (tanpa prefix data:image/...) sebagai photo_data
-        // Di EmailJS template tulis: <img src="data:image/jpeg;base64,{{photo_data}}" />
-        photo_data: photoUrl ? photoUrl.split(',')[1] || '' : '',
-        has_photo:  photoUrl ? 'ya' : 'tidak',
+        // Template EmailJS pakai {{{photo_url}}} (triple curly = unescaped HTML)
+        // Kirim full <img> tag dengan base64 sebagai src
+        photo_url: photoUrl
+          ? `<img src="${photoUrl}" alt="Foto lampiran" style="max-width:480px;width:100%;border-radius:8px;display:block;margin-top:8px;" />`
+          : '<em style="color:#999">Tidak ada foto</em>',
       };
 
       const result = await emailjs.send('service_lq3pvsq', 'template_w8grsoa', payload);
