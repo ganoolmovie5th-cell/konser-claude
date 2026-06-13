@@ -1146,8 +1146,6 @@ const FeedbackForm = (() => {
   }
 
   async function uploadPhoto(file) {
-    // Resize ke max 300px, quality 40% → base64 ~8-15KB, aman untuk EmailJS payload limit
-  async function uploadPhoto(file) {
     // Resize ke 400px max, quality 50% → base64 ~15-25KB, aman untuk EmailJS
     return new Promise((resolve, reject) => {
       const image  = new Image();
