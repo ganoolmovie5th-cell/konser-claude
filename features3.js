@@ -1108,13 +1108,17 @@ const FeedbackForm = (() => {
     }
 
     try {
+      // Batasi panjang message agar tidak melebihi limit EmailJS (50KB total payload)
+      const safeMessage = message.slice(0, 2000);
+
       const payload = {
         from_name:  name,
         from_email: email,
         type:       type.charAt(0).toUpperCase() + type.slice(1),
-        message:    message,
+        message:    safeMessage,
         sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-        photo_url:  photoUrl ? `<img src="${photoUrl}" alt="Foto lampiran" style="max-width:500px;border-radius:8px;display:block;" />` : 'Tidak ada foto',
+        // Kirim keterangan foto saja, bukan base64 — mencegah payload melebihi limit 50KB
+        photo_url:  photoUrl ? '📎 Ada foto terlampir (lihat email terpisah atau upload ulang)' : 'Tidak ada foto',
       };
 
       const result = await emailjs.send('service_lq3pvsq', 'template_w8grsoa', payload);

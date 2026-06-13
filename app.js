@@ -1517,15 +1517,25 @@ renderCards = function(list) {
       card.classList.toggle('in-wishlist', wishlisted);
       const actionsEl = document.createElement('div');
       actionsEl.className = 'card-actions';
-      actionsEl.innerHTML = `
-        <button class="btn-action${wishlisted ? ' wishlisted' : ''}"
-          onclick="event.stopPropagation();toggleWishlist('${c.id}')">
-          ${wishlisted ? '❤️' : '🤍'} ${wishlisted ? 'Wishlisted' : 'Wishlist'}
-        </button>
-
-        <button class="btn-action" onclick="event.stopPropagation();openSharePanel('${c.id}')">
-          🔗 Share
-        </button>`;
+      if (isPast(c)) {
+        // Past concert — disable kedua button
+        actionsEl.innerHTML = `
+          <button class="btn-action" disabled style="opacity:0.35;cursor:not-allowed;">
+            🤍 Wishlist
+          </button>
+          <button class="btn-action" disabled style="opacity:0.35;cursor:not-allowed;">
+            🔗 Share
+          </button>`;
+      } else {
+        actionsEl.innerHTML = `
+          <button class="btn-action${wishlisted ? ' wishlisted' : ''}"
+            onclick="event.stopPropagation();toggleWishlist('${c.id}')">
+            ${wishlisted ? '❤️' : '🤍'} ${wishlisted ? 'Wishlisted' : 'Wishlist'}
+          </button>
+          <button class="btn-action" onclick="event.stopPropagation();openSharePanel('${c.id}')">
+            🔗 Share
+          </button>`;
+      }
       body.insertBefore(actionsEl, cardFooter);
     }
   });
