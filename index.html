@@ -307,7 +307,7 @@
   </section>
 
   <script>
-    function nlSubmit(e) {
+    async function nlSubmit(e) {
       e.preventDefault();
 
       const email = document.getElementById('nlMcEmail').value.trim();
@@ -320,62 +320,36 @@
       btn.textContent = 'Mendaftar...';
       msg.textContent = '';
 
-      // Gunakan hidden iframe POST — lebih reliable dari JSONP
-      // Mailchimp menerima form POST standar via iframe tanpa buka tab baru
-      const ACTION = 'https://web.us20.list-manage.com/subscribe/post'
-                   + '?u=6e07748f7ad9c994e90d82a5f'
-                   + '&id=19bdc664b2'
-                   + '&f_id=007f7ee0f0';
+      try {
+        const res  = await fetch('/api/subscribe', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email }),
+        });
+        const data = await res.json();
 
-      // Buat hidden iframe sebagai target form submission
-      const iframeName = 'nlMcFrame_' + Date.now();
-      const iframe = document.createElement('iframe');
-      iframe.name  = iframeName;
-      iframe.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;visibility:hidden;';
-      document.body.appendChild(iframe);
-
-      // Buat form tersembunyi
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = ACTION;
-      form.target = iframeName;
-      form.style.display = 'none';
-
-      const addField = (name, value) => {
-        const input = document.createElement('input');
-        input.type  = 'hidden';
-        input.name  = name;
-        input.value = value;
-        form.appendChild(input);
-      };
-
-      addField('EMAIL', email);
-      addField('b_6e07748f7ad9c994e90d82a5f_19bdc664b2', ''); // honeypot anti-bot — HARUS kosong
-      document.body.appendChild(form);
-      form.submit();
-
-      // Bersihkan DOM setelah submit
-      setTimeout(() => {
-        try { document.body.removeChild(form); } catch {}
-        try { document.body.removeChild(iframe); } catch {}
-      }, 5000);
-
-      // Tampilkan sukses setelah 1.5 detik (iframe POST tidak ada callback)
-      setTimeout(() => {
-        document.getElementById('nlMcForm').style.display = 'none';
-        btn.style.display = 'none';
-        msg.innerHTML    = '🎉 <strong>Berhasil didaftarkan!</strong>';
-        msg.style.color  = '#4ade80';
-        msg.style.fontSize = '0.88rem';
-        msg.style.lineHeight = '1.5';
-        if (typeof showToast === 'function') {
-          showToast('🎉 Newsletter berhasil didaftarkan!', 'success', 4000);
+        if (res.ok && data.result === 'success') {
+          document.getElementById('nlMcForm').style.display = 'none';
+          msg.innerHTML   = data.note === 'already_subscribed'
+            ? '✅ Email kamu sudah terdaftar sebelumnya!'
+            : '🎉 <strong>Berhasil didaftarkan!</strong>';
+          msg.style.color = '#4ade80';
+          if (typeof showToast === 'function') {
+            showToast('🎉 Newsletter berhasil didaftarkan!', 'success', 4000);
+          }
+        } else {
+          btn.disabled    = false;
+          btn.textContent = 'Daftar Gratis';
+          msg.textContent = '⚠️ ' + (data.error || 'Gagal mendaftar. Coba lagi.');
+          msg.style.color = '#f87171';
         }
-      }, 1500);
+      } catch (err) {
+        btn.disabled    = false;
+        btn.textContent = 'Daftar Gratis';
+        msg.textContent = '⚠️ Koneksi bermasalah. Coba lagi.';
+        msg.style.color = '#f87171';
+      }
     }
-
-    // nlCallback tetap ada sebagai fallback (tidak dipakai aktif)
-    function nlCallback(data) {}
   </script>
 
   <!-- KRITIK & SARAN -->

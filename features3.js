@@ -1108,17 +1108,14 @@ const FeedbackForm = (() => {
     }
 
     try {
-      // Batasi panjang message agar tidak melebihi limit EmailJS (50KB total payload)
-      const safeMessage = message.slice(0, 2000);
-
       const payload = {
         from_name:  name,
         from_email: email,
         type:       type.charAt(0).toUpperCase() + type.slice(1),
-        message:    safeMessage,
+        message:    message,
         sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
         // Kirim base64 data URL langsung sebagai <img> di body email
-        // EmailJS template harus pakai {{{photo_url}}} (triple curly = unescaped HTML)
+        // EmailJS template HARUS pakai {{{photo_url}}} (triple curly = unescaped HTML)
         photo_url: photoUrl
           ? `<img src="${photoUrl}" alt="Foto lampiran" style="max-width:560px;width:100%;border-radius:8px;display:block;margin-top:8px;" />`
           : 'Tidak ada foto',
@@ -1150,14 +1147,13 @@ const FeedbackForm = (() => {
   }
 
   async function uploadPhoto(file) {
-    // Encode foto ke base64 data URL → kirim langsung di body email via EmailJS
-    // Resize ke max 600px, quality 60% → hasil ~25-50KB base64 (aman untuk EmailJS)
+    // Resize ke max 300px, quality 40% → base64 ~8-15KB, aman untuk EmailJS payload limit
     return new Promise((resolve, reject) => {
       const image  = new Image();
       const objUrl = URL.createObjectURL(file);
       image.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('Gagal memuat gambar')); };
       image.onload  = () => {
-        const MAX = 600;
+        const MAX = 300;
         let { width, height } = image;
         if (width > MAX || height > MAX) {
           const ratio = Math.min(MAX / width, MAX / height);
@@ -1169,8 +1165,7 @@ const FeedbackForm = (() => {
         canvas.height = height;
         canvas.getContext('2d').drawImage(image, 0, 0, width, height);
         URL.revokeObjectURL(objUrl);
-        // Kembalikan full data URL (dengan prefix) agar langsung bisa dipakai di <img src="">
-        resolve(canvas.toDataURL('image/jpeg', 0.60));
+        resolve(canvas.toDataURL('image/jpeg', 0.40));
       };
       image.src = objUrl;
     });
