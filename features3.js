@@ -1036,8 +1036,17 @@ const FeedbackForm = (() => {
             <label class="tm-type-opt"><input type="radio" name="type" value="lainnya" /> 💬 Lainnya</label>
           </div>
           <textarea class="fb-textarea" name="message" placeholder="Tuliskan pesan kamu di sini... (min 10 karakter)" rows="4" maxlength="1000" required></textarea>
-          <input class="gb-input" name="photo_link" type="url"
-            placeholder="🔗 Link foto opsional (Google Drive, Imgur, dll)" style="margin-top:8px" />
+          <label class="fb-attach-label" for="fbAttach">
+            <span class="fb-attach-icon">📎</span>
+            <span class="fb-attach-text" id="fbAttachText">Lampirkan foto (opsional · JPG/PNG/WebP · maks 5MB)</span>
+          </label>
+          <input class="fb-attach-input" id="fbAttach" type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onchange="FeedbackForm.onAttach(this)" />
+          <div class="fb-attach-preview" id="fbAttachPreview" style="display:none">
+            <img id="fbAttachImg" alt="preview" />
+            <button type="button" class="fb-attach-remove" onclick="FeedbackForm.removeAttach()">✕ Hapus foto</button>
+          </div>
           <button class="gb-submit fb-btn" type="submit" id="fbSubmitBtn">📬 Kirim Pesan</button>
         </form>
         <div class="fb-msg" id="fbMsg"></div>
@@ -1085,17 +1094,27 @@ const FeedbackForm = (() => {
     btn.disabled    = true;
     btn.textContent = 'Mengirim...';
 
+    // Encode foto ke base64 jika ada
+    let photoHtml = '<em>Tidak ada foto</em>';
+    if (FeedbackForm._attachedFile) {
+      try {
+        btn.textContent = 'Memproses foto...';
+        const b64 = await FeedbackForm.uploadPhoto(FeedbackForm._attachedFile);
+        // Kirim sebagai data URL langsung di src — template pakai {{{photo_url}}}
+        photoHtml = `<img src="${b64}" alt="Foto" style="max-width:480px;width:100%;border-radius:6px;display:block;margin-top:8px;" />`;
+      } catch {
+        photoHtml = '<em>Gagal memproses foto</em>';
+      }
+    }
+
     try {
-      const photoLink = form.photo_link?.value?.trim() || '';
       const payload = {
         from_name:  name,
         from_email: email,
         type:       type.charAt(0).toUpperCase() + type.slice(1),
         message:    message,
         sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-        photo_url:  photoLink
-          ? `<a href="${photoLink}" style="color:#a78bfa">${photoLink}</a>`
-          : '<em>Tidak ada foto</em>',
+        photo_url:  photoHtml,
       };
 
       const result = await emailjs.send('service_lq3pvsq', 'template_w8grsoa', payload);
@@ -1107,6 +1126,7 @@ const FeedbackForm = (() => {
           msg.style.color = '#4ade80';
         }
         form.reset();
+        FeedbackForm.removeAttach();
         showToast('📬 Pesan berhasil dikirim!', 'success', 4000);
       }
     } catch (err) {
@@ -1122,6 +1142,59 @@ const FeedbackForm = (() => {
     }
   }
 
-  return { render, handleSubmit };
+  // Resize foto ke 200px max, quality 30% → base64 ~4-8KB, aman untuk EmailJS
+  async function uploadPhoto(file) {
+    return new Promise((resolve, reject) => {
+      const image  = new Image();
+      const objUrl = URL.createObjectURL(file);
+      image.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('Gagal load gambar')); };
+      image.onload  = () => {
+        const MAX = 200;
+        let { width, height } = image;
+        if (width > MAX || height > MAX) {
+          const ratio = Math.min(MAX / width, MAX / height);
+          width  = Math.round(width  * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width  = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+        URL.revokeObjectURL(objUrl);
+        resolve(canvas.toDataURL('image/jpeg', 0.30));
+      };
+      image.src = objUrl;
+    });
+  }
+
+  function onAttach(input) {
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { showToast('⚠️ Hanya file gambar.', 'error'); input.value = ''; return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('⚠️ Ukuran maksimal 5MB.', 'error'); input.value = ''; return; }
+    FeedbackForm._attachedFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const preview = document.getElementById('fbAttachPreview');
+      const img     = document.getElementById('fbAttachImg');
+      const label   = document.getElementById('fbAttachText');
+      if (img)     img.src = ev.target.result;
+      if (preview) preview.style.display = 'flex';
+      if (label)   label.textContent = `📎 ${file.name} (${(file.size/1024).toFixed(0)}KB)`;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeAttach() {
+    FeedbackForm._attachedFile = null;
+    const input   = document.getElementById('fbAttach');
+    const preview = document.getElementById('fbAttachPreview');
+    const label   = document.getElementById('fbAttachText');
+    if (input)   input.value = '';
+    if (preview) preview.style.display = 'none';
+    if (label)   label.textContent = 'Lampirkan foto (opsional · JPG/PNG/WebP · maks 5MB)';
+  }
+
+  return { render, handleSubmit, uploadPhoto, onAttach, removeAttach };
 })();
 window.FeedbackForm = FeedbackForm;
