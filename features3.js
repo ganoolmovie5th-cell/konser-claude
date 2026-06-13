@@ -1036,29 +1036,19 @@ const FeedbackForm = (() => {
             <label class="tm-type-opt"><input type="radio" name="type" value="lainnya" /> 💬 Lainnya</label>
           </div>
           <textarea class="fb-textarea" name="message" placeholder="Tuliskan pesan kamu di sini... (min 10 karakter)" rows="4" maxlength="1000" required></textarea>
-          <label class="fb-attach-label" for="fbAttach">
-            <span class="fb-attach-icon">📎</span>
-            <span class="fb-attach-text" id="fbAttachText">Lampirkan foto (opsional · JPG/PNG/WebP · maks 2MB)</span>
-          </label>
-          <input class="fb-attach-input" id="fbAttach" type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onchange="FeedbackForm.onAttach(this)" />
-          <div class="fb-attach-preview" id="fbAttachPreview" style="display:none">
-            <img id="fbAttachImg" alt="preview" />
-            <button type="button" class="fb-attach-remove" onclick="FeedbackForm.removeAttach()">✕ Hapus foto</button>
-          </div>
+          <input class="gb-input" name="photo_link" type="url"
+            placeholder="🔗 Link foto opsional (Google Drive, Imgur, dll)" style="margin-top:8px" />
           <button class="gb-submit fb-btn" type="submit" id="fbSubmitBtn">📬 Kirim Pesan</button>
         </form>
         <div class="fb-msg" id="fbMsg"></div>
       </div>`;
   }
 
-  // Rate limiting — max 3 submit per 10 menit
+  // Rate limiting — max 10 submit per 10 menit
   function checkRateLimit() {
     const KEY   = 'cid_fb_rl';
-    const LIMIT = 3;
-    const TTL   = 10 * 60 * 1000; // 10 menit
-    try {
+    const LIMIT = 10;
+    const TTL   = 10 * 60 * 1000; // 10 menit    try {
       const raw  = JSON.parse(localStorage.getItem(KEY) || '{"count":0,"ts":0}');
       const now  = Date.now();
       if (now - raw.ts > TTL) {
@@ -1095,28 +1085,16 @@ const FeedbackForm = (() => {
     btn.disabled    = true;
     btn.textContent = 'Mengirim...';
 
-    // Encode foto ke base64 jika ada
-    let photoUrl = '';
-    const attachedFile = FeedbackForm._attachedFile || null;
-    if (attachedFile) {
-      try {
-        btn.textContent = 'Memproses foto...';
-        photoUrl = await FeedbackForm.uploadPhoto(attachedFile);
-      } catch (uploadErr) {
-        showToast('⚠️ Gagal proses foto, pesan tetap dikirim tanpa foto.', 'error', 4000);
-      }
-    }
-
     try {
+      const photoLink = form.photo_link?.value?.trim() || '';
       const payload = {
         from_name:  name,
         from_email: email,
         type:       type.charAt(0).toUpperCase() + type.slice(1),
         message:    message,
         sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-        // Template EmailJS pakai {{{photo_url}}} (triple curly = render HTML)
-        photo_url: photoUrl
-          ? `<img src="${photoUrl}" alt="Foto lampiran" style="max-width:480px;width:100%;border-radius:8px;display:block;margin-top:8px;" />`
+        photo_url:  photoLink
+          ? `<a href="${photoLink}" style="color:#a78bfa">${photoLink}</a>`
           : '<em>Tidak ada foto</em>',
       };
 
@@ -1145,61 +1123,10 @@ const FeedbackForm = (() => {
     }
   }
 
-  async function uploadPhoto(file) {
-    // Resize ke 400px max, quality 50% → base64 ~15-25KB, aman untuk EmailJS
-    return new Promise((resolve, reject) => {
-      const image  = new Image();
-      const objUrl = URL.createObjectURL(file);
-      image.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('Gagal memuat gambar')); };
-      image.onload  = () => {
-        const MAX = 400;
-        let { width, height } = image;
-        if (width > MAX || height > MAX) {
-          const ratio = Math.min(MAX / width, MAX / height);
-          width  = Math.round(width  * ratio);
-          height = Math.round(height * ratio);
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width  = width;
-        canvas.height = height;
-        canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-        URL.revokeObjectURL(objUrl);
-        // Kembalikan full data URL — prefix "data:image/jpeg;base64," akan distrip saat kirim
-        resolve(canvas.toDataURL('image/jpeg', 0.50));
-      };
-      image.src = objUrl;
-    });
-  }
+  async function uploadPhoto(file) { return ''; } // tidak dipakai, placeholder agar tidak breaking
 
-  function onAttach(input) {
-    const file = input.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { showToast('⚠️ Hanya file gambar.', 'error'); input.value = ''; return; }
-    if (file.size > 2 * 1024 * 1024) { showToast('⚠️ Ukuran maksimal 2MB.', 'error'); input.value = ''; return; }
-
-    FeedbackForm._attachedFile = file;
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const preview = document.getElementById('fbAttachPreview');
-      const img     = document.getElementById('fbAttachImg');
-      const label   = document.getElementById('fbAttachText');
-      if (img)     img.src = ev.target.result;
-      if (preview) preview.style.display = 'flex';
-      if (label)   label.textContent = `📎 ${file.name} (${(file.size/1024).toFixed(0)}KB)`;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function removeAttach() {
-    FeedbackForm._attachedFile = null;
-    const input   = document.getElementById('fbAttach');
-    const preview = document.getElementById('fbAttachPreview');
-    const label   = document.getElementById('fbAttachText');
-    if (input)   input.value = '';
-    if (preview) preview.style.display = 'none';
-    if (label)   label.textContent = 'Lampirkan foto (opsional · JPG/PNG/WebP · maks 2MB)';
-  }
+  function onAttach() {}
+  function removeAttach() {}
 
   return { render, handleSubmit, uploadPhoto, onAttach, removeAttach };
 })();
