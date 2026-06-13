@@ -1145,9 +1145,8 @@ const FeedbackForm = (() => {
     }
   }
 
-  // Resize foto ke 200px max, quality 30% → base64 ~4-8KB, aman untuk EmailJS
+  // Resize foto ke 800px max, quality 85% → kualitas bagus, masih aman untuk EmailJS
   async function uploadPhoto(file) {
-    // Step 1: baca file sebagai data URL via FileReader
     const dataUrl = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onerror = () => reject(new Error('FileReader gagal'));
@@ -1155,12 +1154,11 @@ const FeedbackForm = (() => {
       reader.readAsDataURL(file);
     });
 
-    // Step 2: load ke Image element untuk resize
     const b64 = await new Promise((resolve, reject) => {
       const image = new Image();
       image.onerror = () => reject(new Error('Gagal load gambar'));
       image.onload  = () => {
-        const MAX = 200;
+        const MAX = 800;
         let { width, height } = image;
         if (width > MAX || height > MAX) {
           const ratio = Math.min(MAX / width, MAX / height);
@@ -1171,7 +1169,7 @@ const FeedbackForm = (() => {
         canvas.width  = width;
         canvas.height = height;
         canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.30));
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
       };
       image.src = dataUrl;
     });
