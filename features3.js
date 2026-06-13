@@ -1096,17 +1096,14 @@ const FeedbackForm = (() => {
     btn.textContent = 'Mengirim...';
 
     // Encode foto ke base64 jika ada
-    let photoHtml = '<em>Tidak ada foto</em>';
+    let photoData = '';
     const attachedFile = _attachedFile;
     if (attachedFile) {
       try {
         btn.textContent = 'Memproses foto...';
-        const b64 = await uploadPhoto(attachedFile);
-        photoHtml = `<img src="${b64}" alt="Foto" style="max-width:480px;width:100%;border-radius:6px;display:block;margin-top:8px;" />`;
+        photoData = await uploadPhoto(attachedFile);
       } catch (err) {
         console.error('[foto error]', err);
-        // Jangan blokir pengiriman — tetap kirim pesan tanpa foto
-        photoHtml = `<em>Foto tidak tersedia (${err?.message || 'error'})</em>`;
       }
     }
 
@@ -1117,7 +1114,9 @@ const FeedbackForm = (() => {
         type:       type.charAt(0).toUpperCase() + type.slice(1),
         message:    message,
         sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-        photo_url:  photoHtml,
+        // Kirim base64 murni — template EmailJS tulis: <img src="data:image/jpeg;base64,{{photo_data}}" />
+        photo_data: photoData,
+        has_photo:  photoData ? 'ya' : 'tidak',
       };
 
       const result = await emailjs.send('service_lq3pvsq', 'template_w8grsoa', payload);
@@ -1145,7 +1144,7 @@ const FeedbackForm = (() => {
     }
   }
 
-  // Resize foto ke 800px max, quality 85% → kualitas bagus, masih aman untuk EmailJS
+  // Resize foto ke 600px max, quality 70%
   async function uploadPhoto(file) {
     const dataUrl = await new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1154,11 +1153,11 @@ const FeedbackForm = (() => {
       reader.readAsDataURL(file);
     });
 
-    const b64 = await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const image = new Image();
       image.onerror = () => reject(new Error('Gagal load gambar'));
       image.onload  = () => {
-        const MAX = 800;
+        const MAX = 600;
         let { width, height } = image;
         if (width > MAX || height > MAX) {
           const ratio = Math.min(MAX / width, MAX / height);
@@ -1169,12 +1168,11 @@ const FeedbackForm = (() => {
         canvas.width  = width;
         canvas.height = height;
         canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.85));
+        // Kembalikan base64 MURNI tanpa prefix "data:image/jpeg;base64,"
+        resolve(canvas.toDataURL('image/jpeg', 0.70).split(',')[1]);
       };
       image.src = dataUrl;
     });
-
-    return b64;
   }
 
   function onAttach(input) {
