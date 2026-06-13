@@ -1,27 +1,42 @@
 /**
  * Vercel Serverless Function — Mailchimp Subscribe Proxy
+ * Menggunakan Node https module (bukan fetch) agar kompatibel semua runtime
  *
- * Environment variables yang harus diset di Vercel dashboard:
- *   MAILCHIMP_API_KEY  — API key dari Mailchimp (Account > Extras > API keys)
- *   MAILCHIMP_LIST_ID  — Audience/List ID (Audience > Settings > Audience name and defaults)
- *   MAILCHIMP_SERVER   — Server prefix, misal "us20" (dari URL: us20.admin.mailchimp.com)
+ * Env vars di Vercel dashboard:
+ *   MAILCHIMP_API_KEY  — dari Mailchimp > Account > Extras > API keys
+ *   MAILCHIMP_LIST_ID  — dari Mailchimp > Audience > Settings
+ *   MAILCHIMP_SERVER   — prefix server, misal "us20"
  */
 
+const https = require('https');
+
+function mailchimpRequest(options, postData) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', chunk => { body += chunk; });
+      res.on('end', () => {
+        try {
+          resolve({ status: res.statusCode, data: JSON.parse(body) });
+        } catch {
+          resolve({ status: res.statusCode, data: {} });
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(postData);
+    req.end();
+  });
+}
+
 module.exports = async function handler(req, res) {
-  // CORS headers — wajib ada sebelum apapun
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  // Parse body — Vercel otomatis parse JSON jika Content-Type: application/json
   let email;
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
@@ -39,41 +54,41 @@ module.exports = async function handler(req, res) {
   const SERVER  = process.env.MAILCHIMP_SERVER || 'us20';
 
   if (!API_KEY || !LIST_ID) {
-    console.error('[subscribe] Missing env vars: MAILCHIMP_API_KEY or MAILCHIMP_LIST_ID');
+    console.error('[subscribe] Missing env vars');
     return res.status(500).json({ error: 'Konfigurasi server belum lengkap.' });
   }
 
-  const url  = `https://${SERVER}.api.mailchimp.com/3.0/lists/${LIST_ID}/members`;
-  const auth = Buffer.from(`anystring:${API_KEY}`).toString('base64');
+  const postData = JSON.stringify({ email_address: email, status: 'subscribed' });
+  const auth     = Buffer.from(`anystring:${API_KEY}`).toString('base64');
 
-  let mcRes, data;
+  const options = {
+    hostname: `${SERVER}.api.mailchimp.com`,
+    path:     `/3.0/lists/${LIST_ID}/members`,
+    method:   'POST',
+    headers:  {
+      'Content-Type':   'application/json',
+      'Authorization':  `Basic ${auth}`,
+      'Content-Length': Buffer.byteLength(postData),
+    },
+  };
+
+  let result;
   try {
-    mcRes = await fetch(url, {
-      method:  'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Basic ${auth}`,
-      },
-      body: JSON.stringify({
-        email_address: email,
-        status:        'subscribed',
-      }),
-    });
-    data = await mcRes.json();
+    result = await mailchimpRequest(options, postData);
   } catch (err) {
-    console.error('[subscribe] Fetch to Mailchimp failed:', err);
-    return res.status(500).json({ error: 'Gagal menghubungi Mailchimp.' });
+    console.error('[subscribe] HTTPS request error:', err.message);
+    return res.status(500).json({ error: 'Koneksi ke Mailchimp gagal: ' + err.message });
   }
 
-  if (mcRes.status === 200 || mcRes.status === 201) {
+  if (result.status === 200 || result.status === 201) {
     return res.status(200).json({ result: 'success' });
   }
 
-  if (mcRes.status === 400 && data.title === 'Member Exists') {
+  if (result.status === 400 && result.data.title === 'Member Exists') {
     return res.status(200).json({ result: 'success', note: 'already_subscribed' });
   }
 
-  const errMsg = data.detail || data.title || 'Gagal mendaftar.';
-  console.error('[subscribe] Mailchimp error:', mcRes.status, data);
+  const errMsg = result.data.detail || result.data.title || 'Gagal mendaftar.';
+  console.error('[subscribe] Mailchimp error:', result.status, result.data);
   return res.status(400).json({ error: errMsg });
 };
