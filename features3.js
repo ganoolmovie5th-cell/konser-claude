@@ -1016,6 +1016,7 @@ window.TicketMarket = TicketMarket;
    8. KRITIK & SARAN — kirim ke listconcerttour@gmail.com via EmailJS
    ================================================================ */
 const FeedbackForm = (() => {
+  let _attachedFile = null;  // variabel lokal, bukan FeedbackForm._attachedFile
 
   function render() {
     return `
@@ -1096,13 +1097,14 @@ const FeedbackForm = (() => {
 
     // Encode foto ke base64 jika ada
     let photoHtml = '<em>Tidak ada foto</em>';
-    if (FeedbackForm._attachedFile) {
+    const attachedFile = _attachedFile;
+    if (attachedFile) {
       try {
         btn.textContent = 'Memproses foto...';
-        const b64 = await FeedbackForm.uploadPhoto(FeedbackForm._attachedFile);
-        // Kirim sebagai data URL langsung di src — template pakai {{{photo_url}}}
+        const b64 = await uploadPhoto(attachedFile);
         photoHtml = `<img src="${b64}" alt="Foto" style="max-width:480px;width:100%;border-radius:6px;display:block;margin-top:8px;" />`;
-      } catch {
+      } catch (err) {
+        console.error('[foto]', err);
         photoHtml = '<em>Gagal memproses foto</em>';
       }
     }
@@ -1172,7 +1174,7 @@ const FeedbackForm = (() => {
     if (!file) return;
     if (!file.type.startsWith('image/')) { showToast('⚠️ Hanya file gambar.', 'error'); input.value = ''; return; }
     if (file.size > 5 * 1024 * 1024) { showToast('⚠️ Ukuran maksimal 5MB.', 'error'); input.value = ''; return; }
-    FeedbackForm._attachedFile = file;
+    _attachedFile = file;
     const reader = new FileReader();
     reader.onload = (ev) => {
       const preview = document.getElementById('fbAttachPreview');
@@ -1186,7 +1188,7 @@ const FeedbackForm = (() => {
   }
 
   function removeAttach() {
-    FeedbackForm._attachedFile = null;
+    _attachedFile = null;
     const input   = document.getElementById('fbAttach');
     const preview = document.getElementById('fbAttachPreview');
     const label   = document.getElementById('fbAttachText');
