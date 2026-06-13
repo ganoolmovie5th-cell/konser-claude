@@ -1117,8 +1117,11 @@ const FeedbackForm = (() => {
         type:       type.charAt(0).toUpperCase() + type.slice(1),
         message:    safeMessage,
         sent_at:    new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-        // Kirim keterangan foto saja, bukan base64 — mencegah payload melebihi limit 50KB
-        photo_url:  photoUrl ? '📎 Ada foto terlampir (lihat email terpisah atau upload ulang)' : 'Tidak ada foto',
+        // Kirim base64 data URL langsung sebagai <img> di body email
+        // EmailJS template harus pakai {{{photo_url}}} (triple curly = unescaped HTML)
+        photo_url: photoUrl
+          ? `<img src="${photoUrl}" alt="Foto lampiran" style="max-width:560px;width:100%;border-radius:8px;display:block;margin-top:8px;" />`
+          : 'Tidak ada foto',
       };
 
       const result = await emailjs.send('service_lq3pvsq', 'template_w8grsoa', payload);
@@ -1147,14 +1150,15 @@ const FeedbackForm = (() => {
   }
 
   async function uploadPhoto(file) {
-    // Resize & compress dulu supaya tidak terlalu besar untuk email
+    // Encode foto ke base64 data URL → kirim langsung di body email via EmailJS
+    // Resize ke max 600px, quality 60% → hasil ~25-50KB base64 (aman untuk EmailJS)
     return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onerror = () => reject('Gagal memuat gambar');
-      img.onload  = () => {
-        const MAX = 800;
-        let { width, height } = img;
+      const image  = new Image();
+      const objUrl = URL.createObjectURL(file);
+      image.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('Gagal memuat gambar')); };
+      image.onload  = () => {
+        const MAX = 600;
+        let { width, height } = image;
         if (width > MAX || height > MAX) {
           const ratio = Math.min(MAX / width, MAX / height);
           width  = Math.round(width  * ratio);
@@ -1163,13 +1167,12 @@ const FeedbackForm = (() => {
         const canvas = document.createElement('canvas');
         canvas.width  = width;
         canvas.height = height;
-        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        URL.revokeObjectURL(url);
-        // Convert ke base64 JPEG quality 75% — hasil sekitar 50-150KB
-        const base64 = canvas.toDataURL('image/jpeg', 0.75);
-        resolve(base64);
+        canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+        URL.revokeObjectURL(objUrl);
+        // Kembalikan full data URL (dengan prefix) agar langsung bisa dipakai di <img src="">
+        resolve(canvas.toDataURL('image/jpeg', 0.60));
       };
-      img.src = url;
+      image.src = objUrl;
     });
   }
 
