@@ -379,8 +379,17 @@ const AdvancedSearch = (() => {
   function reset() {
     filters = { priceMax: 10000000, month: 'all', city: 'all', status: 'all' };
     const panel = document.getElementById('advSearchPanel');
-    if (panel) panel.outerHTML = render(); // Re-render fresh
-    // Jangan auto-apply supaya user bisa lihat perubahan dulu
+    if (panel) {
+      const wasOpen = panel.classList.contains('open');
+      panel.outerHTML = render();
+      // Re-inject karena outerHTML replace element dari DOM
+      injectPanel();
+      if (wasOpen) {
+        // Buka kembali panel setelah re-render
+        document.getElementById('advSearchPanel')?.classList.add('open');
+        document.getElementById('advSearchToggle')?.classList.add('active');
+      }
+    }
     if (typeof showToast === 'function') showToast('🔄 Filter direset', 'info', 2000);
     if (typeof renderCards === 'function' && typeof CONCERTS !== 'undefined') {
       let result = [...CONCERTS];

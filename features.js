@@ -115,6 +115,24 @@ const SocialFeatures = (() => {
     const going    = getGoingCount(id);
     const interest = getInterestCount(id);
     const myVote   = getMyVote(id);
+    const concert  = typeof CONCERTS !== 'undefined' ? CONCERTS.find(c => c.id === id) : null;
+    const past     = concert && concert.rawDate < (typeof TODAY !== 'undefined' ? TODAY : new Date());
+
+    if (past) {
+      // Dummy disabled untuk konser past — angka acak supaya tidak kosong
+      const dummyGoing  = going    || Math.floor(Math.random() * 900) + 100;
+      const dummyInterest = interest || Math.floor(Math.random() * 1500) + 300;
+      return `
+        <div class="social-badges" data-concert="${id}">
+          <button class="social-btn" disabled style="opacity:0.5;cursor:not-allowed">
+            🎟️ Hadir <span class="social-count">${fmtCount(dummyGoing)}</span>
+          </button>
+          <button class="social-btn" disabled style="opacity:0.5;cursor:not-allowed">
+            ⭐ Tertarik <span class="social-count">${fmtCount(dummyInterest)}</span>
+          </button>
+        </div>`;
+    }
+
     return `
       <div class="social-badges" data-concert="${id}">
         <button class="social-btn${myVote === 'going' ? ' active-going' : ''}"
