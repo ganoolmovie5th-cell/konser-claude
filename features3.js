@@ -1104,8 +1104,9 @@ const FeedbackForm = (() => {
         const b64 = await uploadPhoto(attachedFile);
         photoHtml = `<img src="${b64}" alt="Foto" style="max-width:480px;width:100%;border-radius:6px;display:block;margin-top:8px;" />`;
       } catch (err) {
-        console.error('[foto]', err);
-        photoHtml = '<em>Gagal memproses foto</em>';
+        console.error('[foto error]', err);
+        // Jangan blokir pengiriman — tetap kirim pesan tanpa foto
+        photoHtml = `<em>Foto tidak tersedia (${err?.message || 'error'})</em>`;
       }
     }
 
@@ -1146,10 +1147,18 @@ const FeedbackForm = (() => {
 
   // Resize foto ke 200px max, quality 30% → base64 ~4-8KB, aman untuk EmailJS
   async function uploadPhoto(file) {
-    return new Promise((resolve, reject) => {
-      const image  = new Image();
-      const objUrl = URL.createObjectURL(file);
-      image.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('Gagal load gambar')); };
+    // Step 1: baca file sebagai data URL via FileReader
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('FileReader gagal'));
+      reader.onload  = (e) => resolve(e.target.result);
+      reader.readAsDataURL(file);
+    });
+
+    // Step 2: load ke Image element untuk resize
+    const b64 = await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onerror = () => reject(new Error('Gagal load gambar'));
       image.onload  = () => {
         const MAX = 200;
         let { width, height } = image;
@@ -1162,11 +1171,12 @@ const FeedbackForm = (() => {
         canvas.width  = width;
         canvas.height = height;
         canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-        URL.revokeObjectURL(objUrl);
         resolve(canvas.toDataURL('image/jpeg', 0.30));
       };
-      image.src = objUrl;
+      image.src = dataUrl;
     });
+
+    return b64;
   }
 
   function onAttach(input) {
