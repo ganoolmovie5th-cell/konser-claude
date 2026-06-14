@@ -82,7 +82,7 @@ const SocialFeatures = (() => {
   async function fetchCounts(id) {
     try {
       const rows = await DB.select('concert_votes',
-        `concert_id=eq.${encodeURIComponent(id)}&select=type`);
+        `concert_id=eq.${encodeURIComponent(id)}&select=type,device_uid`);
       const going      = rows.filter(r => r.type === 'going').length;
       const interested = rows.filter(r => r.type === 'interested').length;
       const myVote     = rows.find(r => r.device_uid === getDeviceUID())?.type || null;
