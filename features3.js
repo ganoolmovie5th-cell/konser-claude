@@ -605,10 +605,16 @@ const GroupBuying = (() => {
   function saveAll(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} }
   function getFor(id) { return getAll()[id] || []; }
 
-  function getUID() {
+  function getOwnerUID() {
+    // UID perangkat — persistent, untuk cek kepemilikan post
     let uid = localStorage.getItem('cid_uid');
     if (!uid) { uid = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('cid_uid', uid); }
     return uid;
+  }
+
+  function genPostUID() {
+    // UID unik per posting — berbeda setiap kali post baru dibuat
+    return 'p_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
   }
 
   function timeAgo(date) {
@@ -626,7 +632,8 @@ const GroupBuying = (() => {
     if (!all[concertId]) all[concertId] = [];
     if (all[concertId].length >= 30) return { ok: false, msg: 'Maksimal 30 posting per konser.' };
     all[concertId].unshift({
-      uid:      getUID(),
+      uid:      genPostUID(),
+      ownerUid: getOwnerUID(),
       name:     name.trim().slice(0,30).replace(/</g,'&lt;'),
       category: (category||'Semua kategori').trim().slice(0,30).replace(/</g,'&lt;'),
       contact:  contact.trim().slice(0,60).replace(/</g,'&lt;'),
@@ -663,7 +670,7 @@ const GroupBuying = (() => {
   }
 
   function renderCard(p, concertId) {
-    const isOwner = p.uid === getUID();
+    const isOwner = p.ownerUid === getOwnerUID();
     const waHref  = buildWaHref(p.contact);
     const igHref  = p.ig ? `https://instagram.com/${p.ig}` : null;
     return `
@@ -929,10 +936,16 @@ const TicketMarket = (() => {
   function saveAll(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} }
   function getFor(id) { return getAll()[id] || []; }
 
-  function getUID() {
+  function getOwnerUID() {
+    // UID perangkat — persistent, untuk cek kepemilikan post
     let uid = localStorage.getItem('cid_uid');
     if (!uid) { uid = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('cid_uid', uid); }
     return uid;
+  }
+
+  function genPostUID() {
+    // UID unik per posting — berbeda setiap kali post baru dibuat
+    return 'p_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
   }
 
   function timeAgo(date) {
@@ -950,7 +963,8 @@ const TicketMarket = (() => {
     if (!all[concertId]) all[concertId] = [];
     if (all[concertId].length >= 50) return { ok: false, msg: 'Maksimal 50 listing per konser.' };
     all[concertId].unshift({
-      uid:      getUID(),
+      uid:      genPostUID(),
+      ownerUid: getOwnerUID(),
       type:     type || 'jual',
       name:     name.trim().slice(0,30).replace(/</g,'&lt;'),
       category: (category||'TBA').trim().slice(0,30).replace(/</g,'&lt;'),
@@ -1009,7 +1023,7 @@ const TicketMarket = (() => {
 
   function renderCard(p, concertId) {
     const priceDisplay = formatRpDisplay(p.price);
-    const isOwner  = p.uid === getUID();
+    const isOwner  = p.ownerUid === getOwnerUID();
     const soldLabel = p.type === 'jual' ? 'Terjual' : 'Ditemukan';
     return `
       <div class="tm-item${p.sold ? ' tm-item-sold' : ''}" id="tmi_${p.uid}">
