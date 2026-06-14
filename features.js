@@ -156,9 +156,28 @@ const SocialFeatures = (() => {
     const past    = concert && concert.rawDate < (typeof TODAY !== 'undefined' ? TODAY : new Date());
 
     if (past) {
-      const seed          = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-      const dummyGoing    = (seed % 900) + 100;
-      const dummyInterest = ((seed * 3) % 1500) + 300;
+      const seed            = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+      const dummyGoing      = (seed % 900) + 100;
+      const dummyInterest   = ((seed * 3) % 1500) + 300;
+
+      // Fetch real count dari Supabase, fallback ke dummy jika 0
+      setTimeout(async () => {
+        try {
+          const data = await fetchCounts(id);
+          const el   = document.querySelector(`.social-badges[data-concert="${id}"]`);
+          if (!el) return;
+          const g = data.going       > 0 ? data.going       : dummyGoing;
+          const i = data.interested  > 0 ? data.interested  : dummyInterest;
+          el.innerHTML = `
+            <button class="social-btn" disabled style="opacity:0.5;cursor:not-allowed">
+              🎟️ Hadir <span class="social-count">${fmtCount(g)}</span>
+            </button>
+            <button class="social-btn" disabled style="opacity:0.5;cursor:not-allowed">
+              ⭐ Tertarik <span class="social-count">${fmtCount(i)}</span>
+            </button>`;
+        } catch { /* tetap pakai dummy */ }
+      }, 0);
+
       return `
         <div class="social-badges" data-concert="${id}">
           <button class="social-btn" disabled style="opacity:0.5;cursor:not-allowed">
