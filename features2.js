@@ -459,7 +459,7 @@ const HargaAlert = (() => {
     const alertItems = alerts.length
       ? alerts.map(b => {
           const matches = getMatchingConcerts(b);
-          const label   = b >= 1e6 ? `Rp ${(b/1e6).toFixed(1)}jt` : `Rp ${(b/1e3).toFixed(0)}rb`;
+          const label   = b >= 1e6 ? `Rp ${b/1e6}jt` : `Rp ${(b/1e3).toFixed(0)}rb`;
           return `
             <div class="ha-item">
               <div class="ha-item-left">
@@ -486,12 +486,13 @@ const HargaAlert = (() => {
             ${[300000,500000,750000,1000000,2000000,3000000].map(v =>
               `<button type="button" class="ha-preset${alerts.includes(v) ? ' ha-preset-active' : ''}"
                 onclick="HargaAlert.quickAdd(${v})">
-                ${v >= 1e6 ? `Rp ${(v/1e6).toFixed(1)}jt` : `Rp ${(v/1e3).toFixed(0)}rb`}
+                ${v >= 1e6 ? `Rp ${v/1e6}jt` : `Rp ${(v/1e3).toFixed(0)}rb`}
               </button>`).join('')}
           </div>
           <div class="ha-custom-row">
-            <input class="ha-input" type="number" id="haCustomInput"
-              placeholder="Budget custom (contoh: 1500000)" min="50000" step="50000" />
+            <input class="ha-input" type="text" id="haCustomInput"
+              placeholder="Budget custom, contoh: 1.500.000" maxlength="12"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/\B(?=(\d{3})+(?!\d))/g,'.')" />
             <button class="ha-add-btn" type="submit">+ Tambah</button>
           </div>
           <div class="ha-msg" id="haMsg"></div>
@@ -525,7 +526,9 @@ const HargaAlert = (() => {
     const input = document.getElementById('haCustomInput');
     const val   = input?.value;
     if (!val) return;
-    const result = addAlert(val);
+    // Hapus titik pemisah ribuan sebelum parse
+    const numericVal = val.replace(/\./g, '');
+    const result = addAlert(numericVal);
     const msg    = document.getElementById('haMsg');
     if (msg) {
       msg.textContent = result.ok ? '✅ Alert ditambahkan!' : '⚠️ ' + result.msg;
@@ -688,6 +691,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const _origRemove   = HargaAlert.remove;
   HargaAlert.quickAdd = function(b) { _origQuickAdd(b); updateHaBadge(); };
   HargaAlert.remove   = function(b) { _origRemove(b);   updateHaBadge(); };
+  const _origHandleAdd = HargaAlert.handleAdd;
+  HargaAlert.handleAdd = function(e) { _origHandleAdd(e); updateHaBadge(); };
 
   // ── Cek Harga Alert saat page load ──
   setTimeout(() => HargaAlert.checkAndNotify(), 2000);
