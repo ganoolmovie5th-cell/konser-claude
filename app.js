@@ -1221,7 +1221,15 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 
 document.getElementById('searchInput').addEventListener('input', function () {
   searchQuery = this.value;
+  const el    = this;
+  const start = el.selectionStart;
+  const end   = el.selectionEnd;
   applyFilters();
+  // Kembalikan focus & cursor position setelah re-render cards
+  requestAnimationFrame(() => {
+    el.focus();
+    el.setSelectionRange(start, end);
+  });
 });
 
 /* ============================================

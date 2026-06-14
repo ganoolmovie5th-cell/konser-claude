@@ -119,9 +119,10 @@ const SocialFeatures = (() => {
     const past     = concert && concert.rawDate < (typeof TODAY !== 'undefined' ? TODAY : new Date());
 
     if (past) {
-      // Dummy disabled untuk konser past — angka acak supaya tidak kosong
-      const dummyGoing  = going    || Math.floor(Math.random() * 900) + 100;
-      const dummyInterest = interest || Math.floor(Math.random() * 1500) + 300;
+      // Dummy disabled untuk konser past — angka deterministik dari ID agar konsisten tiap render
+      const seed = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+      const dummyGoing    = going    || (seed % 900) + 100;
+      const dummyInterest = interest || ((seed * 3) % 1500) + 300;
       return `
         <div class="social-badges" data-concert="${id}">
           <button class="social-btn" disabled style="opacity:0.5;cursor:not-allowed">
