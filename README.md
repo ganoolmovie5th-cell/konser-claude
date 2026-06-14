@@ -13,8 +13,9 @@
 |---|---|
 | 🗓️ Jadwal Lengkap | Data konser 2025–2027: artis, tanggal, venue, jam, dan harga tiket |
 | ✅ / 🔮 Status | Label jelas **Confirmed** (resmi) vs **Rumor** (belum dikonfirmasi) |
-| 🔍 Search & Filter | Cari berdasarkan artis/venue/kota; filter genre, status, harga, bulan, kota |
+| 🔍 Search & Filter | Cari berdasarkan artis/venue/kota; filter genre, status, dan wishlist |
 | 🔍 Advanced Search | Filter harga (slider), bulan, kota/area, dan status konser |
+| 💰 Harga Alert | Set budget maksimal — notifikasi saat ada konser yang sesuai |
 | ❤️ Wishlist | Simpan konser favorit ke localStorage tanpa perlu akun |
 | ⏱️ Countdown | Timer hitung mundur untuk setiap konser mendatang |
 | 📤 Share | Share konser via WhatsApp, Telegram, Instagram, atau copy link |
@@ -24,8 +25,8 @@
 | 🎟️ Going / Interested | Vote kehadiran & ketertarikan per konser |
 | ⭐ Review & Rating | Sistem ulasan & rating berbasis localStorage |
 | 💬 Diskusi | Komentar publik per konser berbasis localStorage |
-| 🛒 Group Buying | Form koordinasi beli tiket bareng |
-| 🏷️ Ticket Market | Listing jual-beli tiket antar fans |
+| 🛒 Forum Jual Beli Tiket | Listing jual/cari tiket antar fans — kontak via emoji WA, edit & hapus per post |
+| 🤝 Cari Teman Nonton | Posting cari teman nonton — kontak WA/IG hanya ditampilkan sebagai ikon |
 | 📋 Setlist.fm | Lihat setlist konser sebelumnya via Setlist.fm API |
 | 📰 Newsletter | Daftar email untuk update konser terbaru (via Mailchimp) |
 | 📬 Kritik & Saran | Form feedback dengan lampiran foto (via EmailJS) |
@@ -75,7 +76,7 @@ Proyek ini adalah **static website** murni — tidak butuh build step.
 git clone https://github.com/ganoolmovie5th-cell/list-concert-tour-claude.git
 cd list-concert-tour-claude
 
-# Jalankan dengan server lokal sederhana (pilih salah satu)
+# Jalankan dengan server lokal (pilih salah satu)
 python3 -m http.server 8080
 # atau
 npx serve .
@@ -85,25 +86,23 @@ Buka browser dan akses `http://localhost:8080`.
 
 ---
 
-## ⚙️ Setup Environment Variables (Vercel Dashboard)
+## ⚙️ Environment Variables (Vercel Dashboard)
 
-Setelah deploy ke Vercel, tambahkan variabel berikut di **Settings → Environment Variables**:
+Setelah deploy ke Vercel, tambahkan di **Settings → Environment Variables**:
 
 | Variable | Keterangan |
 |---|---|
 | `MAILCHIMP_API_KEY` | API key dari Mailchimp → Account → Extras → API keys |
 | `MAILCHIMP_LIST_ID` | Audience ID dari Mailchimp → Audience → Settings |
-| `MAILCHIMP_SERVER` | Server prefix, contoh `us20` (dari URL: `us20.admin.mailchimp.com`) |
+| `MAILCHIMP_SERVER` | Server prefix saja, contoh `us20` (dari URL: `us20.admin.mailchimp.com`) |
 
-> ⚠️ Isi `MAILCHIMP_SERVER` dengan prefix saja (misal `us20`), **bukan** URL lengkap.
+> ⚠️ Isi `MAILCHIMP_SERVER` hanya dengan prefix (contoh: `us20`), **bukan** URL lengkap.
 
 ---
 
-## 📧 Setup GitHub Secrets (untuk Scraper Email)
+## 📧 GitHub Secrets (untuk Scraper Email)
 
-Scraper mengirim laporan harian ke **listconcerttour@gmail.com** via Gmail SMTP.
-
-**Secrets yang dibutuhkan** (Settings → Secrets and variables → Actions):
+Tambahkan di **Settings → Secrets and variables → Actions**:
 
 | Secret | Keterangan |
 |---|---|
@@ -116,48 +115,59 @@ Scraper mengirim laporan harian ke **listconcerttour@gmail.com** via Gmail SMTP.
 
 Scraper berjalan otomatis setiap hari pukul **01:00 WIB** (18:00 UTC).
 
-### Cara Kerja
-
 ```
-Scraper jalan tiap hari
+Scraper jalan tiap hari → Scrape 7+ sumber → Generate laporan HTML + JSON
        ↓
-Scrape 7+ sumber terpercaya
-       ↓
-Generate laporan HTML + JSON
-       ↓
-Kirim ke email admin
-       ↓
-Admin review → update manual app.js jika valid
+Kirim ke email admin → Admin review → Update manual app.js jika valid
 ```
 
-> **Tidak ada auto-push ke repo.** `app.js` hanya diubah secara manual setelah review.
+> Tidak ada auto-push ke repo. `app.js` hanya diubah secara manual setelah review.
 
-### Trigger Manual
-
-Buka tab **Actions** → pilih **"🎵 Daily Concert Monitor"** → **Run workflow**.
+**Trigger manual:** Actions → "🎵 Daily Concert Monitor" → Run workflow.
 
 ---
 
 ## 📬 Setup EmailJS (Kritik & Saran)
 
-Form Kritik & Saran mengirim pesan + foto ke email via [EmailJS](https://emailjs.com).
+Form Kritik & Saran mengirim pesan + foto via [EmailJS](https://emailjs.com).
 
 **Konfigurasi di `features3.js`:**
 - Service ID: `service_lq3pvsq`
 - Template ID: `template_w8grsoa`
-- Public Key: di `index.html` saat init
+- Public Key: di-init di `index.html`
 
-**Template EmailJS** harus punya variable berikut:
+**Template EmailJS** harus memiliki variabel berikut:
 - `{{from_name}}`, `{{from_email}}`, `{{type}}`, `{{message}}`, `{{sent_at}}`
-- `{{photo_data}}` — untuk foto (base64 murni, gunakan dalam tag `<img>`)
+- `{{photo_data}}` — base64 foto murni (tanpa prefix `data:image/...`)
 
-Di template EmailJS, bagian foto ditulis:
+Bagian foto di template EmailJS:
 ```html
 {{#if has_photo}}
 <img src="data:image/jpeg;base64,{{photo_data}}"
-     style="max-width:500px;width:100%;border-radius:8px;" />
+     style="max-width:500px;width:100%;border-radius:8px;display:block;" />
 {{/if}}
 ```
+
+> ⚠️ Pastikan template sudah di-**Save** setelah mengedit di dashboard EmailJS.
+
+---
+
+## 🎫 Forum Jual Beli Tiket & Cari Teman Nonton
+
+Fitur berbasis `localStorage` — data tersimpan di browser pengunjung.
+
+### Forum Jual Beli Tiket
+- Post listing **Jual** atau **Cari** tiket
+- Kontak ditampilkan sebagai emoji **💬** (WhatsApp) — nomor tidak diekspos
+- Pemilik post bisa: **✓ Tandai Terjual/Ditemukan**, **✏️ Edit**, **🗑️ Hapus**
+- Hapus hanya menghapus 1 post spesifik, post lain tetap ada
+- Input harga otomatis format ribuan (1.500.000)
+
+### Cari Teman Nonton
+- Post untuk cari teman nonton bareng
+- Isi No WA dan @Instagram terpisah
+- Kontak ditampilkan sebagai emoji **💬** dan **📷** — nomor/username tidak diekspos
+- Pemilik post bisa: **✏️ Edit**, **🗑️ Hapus**
 
 ---
 
@@ -169,7 +179,7 @@ Akses di `/analytics.html`.
 - Menampilkan: klik per konser, wishlist, review stats, distribusi genre/status
 - Fitur export: **CSV** dan **JSON**
 
-> ⚠️ Ganti password default sebelum deploy ke production — edit `PASS_HASH` di `analytics.html`.
+> ⚠️ Ganti password default sebelum deploy — edit `PASS_HASH` di `analytics.html`.
 
 ---
 
@@ -180,7 +190,7 @@ Akses di `/analytics.html`.
 | Frontend | HTML5, CSS3 (custom dark/light theme), Vanilla JavaScript |
 | Font | Inter + Syne via Google Fonts |
 | Analytics | Google Analytics 4 (GA4) |
-| Storage | `localStorage` (wishlist, reviews, diskusi, vote) |
+| Storage | `localStorage` (wishlist, reviews, diskusi, vote, forum) |
 | Newsletter | Mailchimp Marketing API v3 (via Vercel Serverless Function) |
 | Email | EmailJS (kritik & saran dengan foto) |
 | Maps | Google Maps Embed API |
@@ -237,6 +247,7 @@ Ada konser yang belum masuk atau info yang perlu diperbarui?
 - Selalu verifikasi ke platform resmi sebelum membeli tiket.
 - Konser berlabel **🔮 Rumor** belum dikonfirmasi — **jangan beli tiket dari calo!**
 - Harga tiket dapat berubah sewaktu-waktu.
+- Data di Forum Jual Beli Tiket & Cari Teman Nonton tidak diverifikasi admin — selalu hati-hati.
 
 ---
 
