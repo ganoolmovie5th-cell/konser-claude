@@ -1009,14 +1009,14 @@ const TicketMarket = (() => {
 
   function renderCard(p, concertId) {
     const priceDisplay = formatRpDisplay(p.price);
-    const isOwner = p.uid === getUID();
+    const isOwner  = p.uid === getUID();
     const soldLabel = p.type === 'jual' ? 'Terjual' : 'Ditemukan';
     return `
       <div class="tm-item${p.sold ? ' tm-item-sold' : ''}" id="tmi_${p.uid}">
         <div class="tm-item-top">
           <span class="tm-type-badge tm-type-${p.type}">${p.type === 'jual' ? 'JUAL' : 'BELI'}${p.sold ? ' ✓' : ''}</span>
           <div class="tm-info">
-            <span class="tm-name">${p.name}</span>
+            <span class="tm-name">${p.name}${p.sold ? ` <em style="color:#4ade80;font-size:0.75rem">(${soldLabel})</em>` : ''}</span>
             <span class="tm-meta">${p.category} · ${p.qty} tiket${priceDisplay ? ` · <strong>${priceDisplay}</strong>` : ''}</span>
           </div>
           ${buildContactEmoji(p.contact)}
@@ -1026,14 +1026,14 @@ const TicketMarket = (() => {
           ${p.sold
             ? `<span class="tm-sold-label">✅ ${soldLabel}</span>`
             : isOwner
-              ? `<button class="tm-mark-sold" onclick="TicketMarket.markSold('${concertId}','${p.uid}')">✓ Tandai ${soldLabel}</button>`
+              ? `<button class="tm-mark-sold" onclick="TicketMarket.markSold('${concertId}','${p.uid}','${p.type}')">✓ Tandai ${soldLabel}</button>`
               : ''
           }
           <span class="tm-time">${timeAgo(p.date)}</span>
           ${isOwner && !p.sold ? `
             <div class="post-actions">
               <button class="post-btn-edit" onclick="TicketMarket.startEdit('${concertId}','${p.uid}')">✏️</button>
-              <button class="post-btn-del"  onclick="TicketMarket.deletePost('${concertId}','${p.uid}')">🗑️</button>
+              <button class="post-btn-del"  onclick="TicketMarket.deletePost('${concertId}','${p.uid}','${p.type}')">🗑️</button>
             </div>` : ''}
         </div>
       </div>`;
@@ -1116,24 +1116,44 @@ const TicketMarket = (() => {
     showToast(type === 'jual' ? '🎫 Listing berhasil diposting!' : '🔍 Pencarian berhasil diposting!', 'success', 2500);
   }
 
-  function markSold(concertId, uid) {
+  function markSold(concertId, uid, type) {
     const all   = getAll();
     const posts = all[concertId] || [];
     const p     = posts.find(x => x.uid === uid);
     if (!p) return;
-    // Gunakan tipe post itu sendiri untuk menentukan label — bukan hardcode
     p.sold = true;
     saveAll(all);
+    // Re-render section lalu set tab ke tipe post yang di-tandai
     const section = document.getElementById(`tm_${concertId}`);
-    if (section) section.outerHTML = render(concertId);
+    if (section) {
+      section.outerHTML = render(concertId);
+      // Aktifkan tab yang sesuai
+      const activeType = type || p.type;
+      const tabs = document.querySelectorAll(`#tm_${concertId} .tm-tab`);
+      tabs.forEach(btn => {
+        const isTarget = (activeType === 'jual' && btn.textContent.trim().startsWith('Jual'))
+                      || (activeType === 'beli' && btn.textContent.trim().startsWith('Cari'));
+        if (isTarget) switchTab(btn, concertId, activeType);
+      });
+    }
     showToast(p.type === 'jual' ? '✅ Tandai Terjual!' : '✅ Tandai Ditemukan!', 'success', 2000);
   }
 
-  function deletePost(concertId, uid) {
+  function deletePost(concertId, uid, type) {
     if (!confirm('Hapus listing ini?')) return;
     remove(concertId, uid);
     const section = document.getElementById(`tm_${concertId}`);
-    if (section) section.outerHTML = render(concertId);
+    if (section) {
+      section.outerHTML = render(concertId);
+      // Kembali ke tab yang sama setelah delete
+      const activeType = type || 'jual';
+      const tabs = document.querySelectorAll(`#tm_${concertId} .tm-tab`);
+      tabs.forEach(btn => {
+        const isTarget = (activeType === 'jual' && btn.textContent.trim().startsWith('Jual'))
+                      || (activeType === 'beli' && btn.textContent.trim().startsWith('Cari'));
+        if (isTarget) switchTab(btn, concertId, activeType);
+      });
+    }
     showToast('🗑️ Listing dihapus.', 'info', 2000);
   }
 
